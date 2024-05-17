@@ -5,12 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1e0693eb-cfcb-4856-aa32-0b0dd3b6faf9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../EvaluationStu/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../EvaluationStu/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../EvaluationStu/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/local.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/local.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../EvaluationStu/.idea/modules/app/EvaluationStu.app.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/.gradle/8.0/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/.gradle/8.0/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/.gradle/8.0/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/.gradle/8.0/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/.gradle/8.0/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/.gradle/8.0/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/app/src/androidTest/java/com/example/evaluationstu/ExampleInstrumentedTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/app/src/androidTest/java/com/example/EvaluationStu/ExampleInstrumentedTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/app/src/main/java/com/example/evaluationstu/AppNavHost.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/app/src/main/java/com/example/EvaluationStu/AppNavHost.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/app/src/main/java/com/example/evaluationstu/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/app/src/main/java/com/example/EvaluationStu/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/app/src/main/java/com/example/evaluationstu/auth/ForgotPasswordScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/app/src/main/java/com/example/EvaluationStu/auth/ForgotPasswordScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/app/src/main/java/com/example/evaluationstu/auth/LoginScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/app/src/main/java/com/example/EvaluationStu/auth/LoginScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/app/src/main/java/com/example/evaluationstu/auth/RegisterScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/app/src/main/java/com/example/EvaluationStu/auth/RegisterScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EvaluationStu/app/src/test/java/com/example/evaluationstu/ExampleUnitTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../EvaluationStu/app/src/test/java/com/example/EvaluationStu/ExampleUnitTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.0/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/androidTest/java/com/example/evalutionma/ExampleInstrumentedTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/androidTest/java/com/example/EvaluationMa/ExampleInstrumentedTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/evalutionma/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/EvaluationMa/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/evalutionma/admin/UserVerificationScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/EvaluationMa/admin/UserVerificationScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/evalutionma/auth/ForgotPasswordScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/EvaluationMa/auth/ForgotPasswordScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/evalutionma/auth/LoginScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/EvaluationMa/auth/LoginScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/evalutionma/auth/RegisterScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/EvaluationMa/auth/RegisterScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/evalutionma/mainActivityUI/AppNavHost.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/EvaluationMa/mainActivityUI/AppNavHost.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/test/java/com/example/evalutionma/ExampleUnitTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/example/EvaluationMa/ExampleUnitTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,6 +98,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "cidr.known.project.marker": "true",
     "last_opened_file_path": "D:/IDEAproject/EvaluationAPP/EvalutionMa",
     "project.structure.last.edited": "Modules",
