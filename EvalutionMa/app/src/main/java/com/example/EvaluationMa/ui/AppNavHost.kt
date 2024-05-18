@@ -1,5 +1,6 @@
 package com.example.EvaluationMa.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +33,11 @@ fun AppNavHost() {
             db.collection("users").document(user.uid).get()
                 .addOnSuccessListener { document ->
                     userRole = document.getString("role")
+//                    Log.d("AppNavHost", "User role: $userRole")
                 }
+//                .addOnFailureListener { exception ->
+//                    Log.e("AppNavHost", "Error getting user role: $exception")
+//                }
         }
     }
 

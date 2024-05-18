@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
+import android.util.Log
 
 @Composable
 fun UserVerificationScreen(navController: NavController) {
@@ -23,10 +24,16 @@ fun UserVerificationScreen(navController: NavController) {
             .whereEqualTo("verified", false)
             .get()
             .addOnSuccessListener { result ->
-                unverifiedUsers = result.documents.mapNotNull { it.data }
+                unverifiedUsers = result.documents.mapNotNull { document ->
+                    val data = document.data
+                    data?.put("uid", document.id)
+                    data
+                }
+                Log.d("UserVerificationScreen", "Fetched users: $unverifiedUsers")
             }
             .addOnFailureListener { e ->
                 errorMessage = "Error fetching users: $e"
+                Log.e("UserVerificationScreen", errorMessage)
             }
     }
 
@@ -46,9 +53,11 @@ fun UserVerificationScreen(navController: NavController) {
                             .update(mapOf("verified" to true, "role" to role))
                             .addOnSuccessListener {
                                 unverifiedUsers = unverifiedUsers.filterNot { it["uid"] == userId }
+                                Log.d("UserVerificationScreen", "Verified user: $userId with role: $role")
                             }
                             .addOnFailureListener { e ->
                                 errorMessage = "Error verifying user: $e"
+                                Log.e("UserVerificationScreen", errorMessage)
                             }
                     })
                 }
@@ -68,6 +77,7 @@ fun UserItem(user: Map<String, Any>, onVerify: (String, String) -> Unit) {
     val userId = user["uid"] as? String ?: ""
     val email = user["email"] as? String ?: ""
     var selectedRole by remember { mutableStateOf("student") }
+    var expanded by remember { mutableStateOf(false) }
     val roles = listOf("student", "tutor", "client", "component_manager", "module_manager")
 
     Row(
@@ -77,18 +87,34 @@ fun UserItem(user: Map<String, Any>, onVerify: (String, String) -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(email)
-        DropdownMenu(
-            expanded = true,
-            onDismissRequest = { /* Handle dismiss request */ },
-        ) {
-            roles.forEach { role ->
-                DropdownMenuItem(onClick = { selectedRole = role }) {
-                    Text(role)
+        Text(email, modifier = Modifier.weight(1f))
+
+        Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+            TextButton(onClick = { expanded = true }) {
+                Text(selectedRole)
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                roles.forEach { role ->
+                    DropdownMenuItem(onClick = {
+                        selectedRole = role
+                        expanded = false
+                    }) {
+                        Text(role)
+                    }
                 }
             }
         }
-        Button(onClick = { onVerify(userId, selectedRole) }) {
+
+        Button(onClick = {
+            if (userId.isNotEmpty()) {
+                onVerify(userId, selectedRole)
+            } else {
+                Log.e("UserItem", "User ID is empty for user: $email")
+            }
+        }) {
             Text("Verify")
         }
     }
