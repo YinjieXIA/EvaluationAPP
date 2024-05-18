@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.evalutionma"
+    namespace = "com.example.EvaluationMa"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.evalutionma"
+        applicationId = "com.example.EvaluationMa"
         minSdk = 28
         targetSdk = 34
         versionCode = 1

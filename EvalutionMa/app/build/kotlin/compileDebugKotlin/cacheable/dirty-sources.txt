@@ -1,0 +1,6 @@
+D:\IDEAproject\EvaluationAPP\EvalutionMa\app\src\main\java\com\example\EvaluationMa\MainActivity.kt
+D:\IDEAproject\EvaluationAPP\EvalutionMa\app\src\main\java\com\example\EvaluationMa\mainActivityUI\AppNavHost.kt
+D:\IDEAproject\EvaluationAPP\EvalutionMa\app\src\main\java\com\example\EvaluationMa\admin\UserVerificationScreen.kt
+D:\IDEAproject\EvaluationAPP\EvalutionMa\app\src\main\java\com\example\EvaluationMa\auth\RegisterScreen.kt
+D:\IDEAproject\EvaluationAPP\EvalutionMa\app\src\main\java\com\example\EvaluationMa\auth\ForgotPasswordScreen.kt
+D:\IDEAproject\EvaluationAPP\EvalutionMa\app\src\main\java\com\example\EvaluationMa\auth\LoginScreen.kt

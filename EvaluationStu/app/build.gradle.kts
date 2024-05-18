@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.evaluationstu"
+    namespace = "com.example.EvaluationStu"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.evaluationstu"
+        applicationId = "com.example.EvaluationStu"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
