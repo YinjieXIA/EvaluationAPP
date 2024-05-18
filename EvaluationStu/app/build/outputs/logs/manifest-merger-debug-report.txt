@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:2:1-16:12
-INJECTED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:2:1-16:12
-INJECTED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:2:1-16:12
-INJECTED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:2:1-16:12
+ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:2:1-26:12
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\安宇琪\.gradle\caches\transforms-3\60a86cd991a016e585f1af658d14c41a\transformed\material-1.11.0\AndroidManifest.xml:17:1-24:12
 MERGED from [com.google.firebase:firebase-firestore:25.0.0] C:\Users\安宇琪\.gradle\caches\transforms-3\9c8bcb6e03ca894afc35a1aa770d1fe1\transformed\firebase-firestore-25.0.0\AndroidManifest.xml:2:1-26:12
 MERGED from [com.google.firebase:firebase-auth-ktx:23.0.0] C:\Users\安宇琪\.gradle\caches\transforms-3\5fe0fe38a2ee5a8c98da1712b874c51a\transformed\firebase-auth-ktx-23.0.0\AndroidManifest.xml:2:1-17:12
@@ -126,8 +126,8 @@ MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\安
 	xmlns:android
 		ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:2:11-69
 application
-ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:5:5-14:32
-INJECTED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:5:5-14:32
+ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:5:5-25:19
+INJECTED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:5:5-25:19
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\安宇琪\.gradle\caches\transforms-3\60a86cd991a016e585f1af658d14c41a\transformed\material-1.11.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\安宇琪\.gradle\caches\transforms-3\60a86cd991a016e585f1af658d14c41a\transformed\material-1.11.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.firebase:firebase-firestore:25.0.0] C:\Users\安宇琪\.gradle\caches\transforms-3\9c8bcb6e03ca894afc35a1aa770d1fe1\transformed\firebase-firestore-25.0.0\AndroidManifest.xml:13:5-24:19
@@ -218,6 +218,22 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\安宇琪\.gradle\
 		ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:13:9-51
 	android:dataExtractionRules
 		ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:7:9-65
+activity#com.example.EvaluationStu.MainActivity
+ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:16:5-23:16
+	android:exported
+		ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:18:9-32
+	android:name
+		ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:17:9-37
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:19:9-22:25
+action#android.intent.action.MAIN
+ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:20:13-65
+	android:name
+		ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:20:21-62
+category#android.intent.category.LAUNCHER
+ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:21:13-73
+	android:name
+		ADDED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml:21:23-70
 uses-sdk
 INJECTED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\AndroidManifest.xml

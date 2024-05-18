@@ -1,5 +1,0 @@
-D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\java\com\example\EvaluationStu\auth\LoginScreen.kt
-D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\java\com\example\EvaluationStu\auth\ForgotPasswordScreen.kt
-D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\java\com\example\EvaluationStu\AppNavHost.kt
-D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\java\com\example\EvaluationStu\auth\RegisterScreen.kt
-D:\IDEAproject\EvaluationAPP\EvaluationStu\app\src\main\java\com\example\EvaluationStu\MainActivity.kt

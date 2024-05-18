@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.example.EvaluationStu.ui.AppNavHost
 import com.example.EvaluationStu.ui.theme.MyProjectTheme
 
 class MainActivity : ComponentActivity() {
