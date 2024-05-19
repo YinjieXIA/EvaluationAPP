@@ -60,8 +60,10 @@ fun LoginScreen(navController: NavController) {
                                                     auth.signOut()
                                                     errorMessage = "Students do not have access to this app."
                                                 } else {
-                                                    errorMessage = ""
-                                                    navController.navigate("verify_users")
+                                                    if (role == "module_manager") {
+                                                        errorMessage = ""
+                                                        navController.navigate("module_manage")
+                                                    }
                                                 }
                                             } else {
                                                 auth.signOut() // 登出用户
