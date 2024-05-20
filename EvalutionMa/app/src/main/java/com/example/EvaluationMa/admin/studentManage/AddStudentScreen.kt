@@ -142,7 +142,7 @@ fun StudentSelectItem(
         Button(
             onClick = { onSelect(studentId) },
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = if (isSelected) Color.Green else Color.Blue
+                backgroundColor = if (isSelected) Color.Green else Color.White
             )
         ) {
             Text(if (isSelected) "Selected" else "Select")

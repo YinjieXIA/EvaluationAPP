@@ -26,6 +26,9 @@ import com.example.EvaluationMa.admin.studentManage.AddTeamScreen
 import com.example.EvaluationMa.admin.studentManage.GroupTeamManagementScreen
 import com.example.EvaluationMa.admin.studentManage.StudentDetailScreen
 import com.example.EvaluationMa.admin.studentManage.StudentManagementScreen
+import com.example.EvaluationMa.admin.studentManage.AssignClientScreen
+import com.example.EvaluationMa.admin.studentManage.AssignComponentScreen
+import com.example.EvaluationMa.admin.studentManage.AssignTutorScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -119,6 +122,31 @@ fun AppNavHost() {
             val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
             val teamId = backStackEntry.arguments?.getString("teamId") ?: ""
             AddStudentScreen(navController, groupId, teamId)
+        }
+        composable(
+            route = "assign_client/{groupId}",
+            arguments = listOf(navArgument("groupId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            AssignClientScreen(navController, groupId)
+        }
+        composable(
+            route = "assign_component/{groupId}",
+            arguments = listOf(navArgument("groupId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            AssignComponentScreen(navController, groupId)
+        }
+        composable(
+            route = "assign_tutor/{groupId}/{teamId}",
+            arguments = listOf(
+                navArgument("groupId") { type = NavType.StringType },
+                navArgument("teamId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            val teamId = backStackEntry.arguments?.getString("teamId") ?: ""
+            AssignTutorScreen(navController, groupId, teamId)
         }
         // 添加其他
     }
