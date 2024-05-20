@@ -101,6 +101,15 @@ fun GroupTeamManagementScreen(navController: NavController) {
                         onAssignClient = { groupId ->
                             navController.navigate("assign_client/$groupId")
                         },
+                        onRemoveClient = { groupId ->
+                            db.collection("groups").document(groupId).update("assignedClient", null)
+                                .addOnSuccessListener {
+                                    errorMessage = "Client removed successfully"
+                                }
+                                .addOnFailureListener { e ->
+                                    errorMessage = "Error removing client: $e"
+                                }
+                        },
                         onAssignComponent = { groupId ->
                             navController.navigate("assign_component/$groupId")
                         }
@@ -141,6 +150,15 @@ fun GroupTeamManagementScreen(navController: NavController) {
                             },
                             onAssignTutor = { teamId ->
                                 navController.navigate("assign_tutor/$selectedGroupId/$teamId")
+                            },
+                            onRemoveTutor = { teamId ->
+                                db.collection("groups").document(selectedGroupId!!).collection("teams").document(teamId).update("tutors", null)
+                                    .addOnSuccessListener {
+                                        errorMessage = "Tutor removed successfully"
+                                    }
+                                    .addOnFailureListener { e ->
+                                        errorMessage = "Error removing tutor: $e"
+                                    }
                             }
                         )
                     }
@@ -213,34 +231,51 @@ fun GroupItem(
     onEdit: (String) -> Unit,
     onDelete: (String) -> Unit,
     onAssignClient: (String) -> Unit,
+    onRemoveClient: (String) -> Unit,
     onAssignComponent: (String) -> Unit
 ) {
     val groupId = group["uid"] as? String ?: ""
     val groupName = group["name"] as? String ?: ""
+    val assignedClient = group["assignedClient"] as? String ?: "No client assigned"
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.Start
     ) {
-        Text(groupName)
-        Row {
-            Button(onClick = { onEdit(groupId) }) {
+        Text(groupName, style = MaterialTheme.typography.body1)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = { onEdit(groupId) }, modifier = Modifier.weight(1f)) {
                 Text("Edit")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = { onDelete(groupId) }) {
-                Text("Delete")
+            Button(onClick = { onAssignComponent(groupId) }, modifier = Modifier.weight(1f)) {
+                Text("Assign Component")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = { onAssignClient(groupId) }) {
+            Button(onClick = { onDelete(groupId) }, modifier = Modifier.weight(1f)) {
+                Text("Delete")
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("Assigned Client: $assignedClient", style = MaterialTheme.typography.body2)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = { onAssignClient(groupId) }, modifier = Modifier.weight(1f)) {
                 Text("Assign Client")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = { onAssignComponent(groupId) }) {
-                Text("Assign Component")
+            Button(onClick = { onRemoveClient(groupId) }, modifier = Modifier.weight(1f)) {
+                Text("Remove Client")
             }
         }
     }
@@ -251,30 +286,52 @@ fun TeamItem(
     team: Map<String, Any>,
     onEdit: (String) -> Unit,
     onDelete: (String) -> Unit,
-    onAssignTutor: (String) -> Unit
+    onAssignTutor: (String) -> Unit,
+    onRemoveTutor: (String) -> Unit
 ) {
     val teamId = team["uid"] as? String ?: ""
     val teamName = team["name"] as? String ?: ""
+    val assignedTutors = team["tutors"] as? List<String> ?: listOf()
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.Start
     ) {
-        Text(teamName)
-        Row {
-            Button(onClick = { onEdit(teamId) }) {
+        Text(teamName, style = MaterialTheme.typography.body1)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = { onEdit(teamId) }, modifier = Modifier.weight(1f)) {
                 Text("Edit")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = { onDelete(teamId) }) {
+            Button(onClick = { onDelete(teamId) }, modifier = Modifier.weight(1f)) {
                 Text("Delete")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = { onAssignTutor(teamId) }) {
+            Button(onClick = { onAssignTutor(teamId) }, modifier = Modifier.weight(1f)) {
                 Text("Assign Tutor")
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("Assigned Tutors: ${assignedTutors.joinToString(", ")}", style = MaterialTheme.typography.body2)
+        LazyColumn {
+            items(assignedTutors) { tutorId ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(tutorId, modifier = Modifier.weight(1f))
+                    Button(onClick = { onRemoveTutor(teamId) }, modifier = Modifier.weight(1f)) {
+                        Text("Remove Tutor")
+                    }
+                }
             }
         }
     }
@@ -289,20 +346,24 @@ fun StudentItem(
     val studentId = student["uid"] as? String ?: ""
     val studentName = "${student["firstName"]} ${student["lastName"]}"
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.Start
     ) {
-        Text(studentName)
-        Row {
-            Button(onClick = { onEdit(studentId) }) {
+        Text(studentName, style = MaterialTheme.typography.body1)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = { onEdit(studentId) }, modifier = Modifier.weight(1f)) {
                 Text("Edit")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = { onDelete(studentId) }) {
+            Button(onClick = { onDelete(studentId) }, modifier = Modifier.weight(1f)) {
                 Text("Delete")
             }
         }
