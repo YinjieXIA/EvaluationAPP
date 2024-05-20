@@ -66,6 +66,43 @@ fun AppNavHost() {
             val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
             SkillManagementScreen(navController, componentId)
         }
+        composable("group_team_management") {
+            if (userRole == "module_manager") {
+                GroupTeamManagementScreen(navController)
+            } else {
+                NoPermissionScreen()
+            }
+        }
+        composable("student_management") {
+            if (userRole == "module_manager" || userRole == "component_manager") {
+                StudentManagementScreen(navController)
+            } else {
+                NoPermissionScreen()
+            }
+        }
+        composable("student_detail/{studentId}") { backStackEntry ->
+            val studentId = backStackEntry.arguments?.getString("studentId") ?: ""
+            if (userRole == "module_manager" || userRole == "component_manager") {
+                StudentDetailScreen(navController, studentId)
+            } else {
+                NoPermissionScreen()
+            }
+        }
+        composable("add_group") {
+            if (userRole == "module_manager") {
+                AddGroupScreen(navController)
+            } else {
+                NoPermissionScreen()
+            }
+        }
+        composable("add_team/{groupId}") { backStackEntry ->
+            if (userRole == "module_manager") {
+                val groupId = backStackEntry.arguments?.getString("groupId") ?: return@composable
+                AddTeamScreen(navController, groupId)
+            } else {
+                NoPermissionScreen()
+            }
+        }
         // 添加其他页面
     }
 }
