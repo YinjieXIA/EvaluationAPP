@@ -17,7 +17,7 @@ fun AddStudentScreen(navController: NavController, groupId: String, teamId: Stri
     val db = FirebaseFirestore.getInstance()
     var students by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
     var availableStudents by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
-    var selectedStudentId by remember { mutableStateOf<String?>(null) }
+    var selectedStudentIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var errorMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -79,9 +79,17 @@ fun AddStudentScreen(navController: NavController, groupId: String, teamId: Stri
         if (availableStudents.isNotEmpty()) {
             LazyColumn {
                 items(availableStudents) { student ->
-                    StudentSelectItem(student, onSelect = { studentId ->
-                        selectedStudentId = studentId
-                    })
+                    StudentSelectItem(
+                        student = student,
+                        isSelected = selectedStudentIds.contains(student["uid"] as String),
+                        onSelect = { studentId ->
+                            selectedStudentIds = if (selectedStudentIds.contains(studentId)) {
+                                selectedStudentIds - studentId
+                            } else {
+                                selectedStudentIds + studentId
+                            }
+                        }
+                    )
                 }
             }
         } else {
@@ -91,13 +99,10 @@ fun AddStudentScreen(navController: NavController, groupId: String, teamId: Stri
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
-            if (selectedStudentId != null) {
-                db.collection("groups").document(groupId).collection("teams").document(teamId).collection("students").document(selectedStudentId!!).set(mapOf("uid" to selectedStudentId))
+            selectedStudentIds.forEach { studentId ->
+                db.collection("groups").document(groupId).collection("teams").document(teamId).collection("students").document(studentId).set(mapOf("uid" to studentId))
                     .addOnSuccessListener {
-                        db.collection("users").document(selectedStudentId!!).update(mapOf("group" to groupId, "team" to teamId))
-                            .addOnSuccessListener {
-                                navController.popBackStack()
-                            }
+                        db.collection("users").document(studentId).update(mapOf("group" to groupId, "team" to teamId))
                             .addOnFailureListener { e ->
                                 errorMessage = "Error updating student: $e"
                             }
@@ -106,6 +111,7 @@ fun AddStudentScreen(navController: NavController, groupId: String, teamId: Stri
                         errorMessage = "Error adding student: $e"
                     }
             }
+            navController.popBackStack()
         }) {
             Text("Add Student")
         }
@@ -119,6 +125,7 @@ fun AddStudentScreen(navController: NavController, groupId: String, teamId: Stri
 @Composable
 fun StudentSelectItem(
     student: Map<String, Any>,
+    isSelected: Boolean,
     onSelect: (String) -> Unit
 ) {
     val studentId = student["uid"] as? String ?: ""
@@ -132,8 +139,13 @@ fun StudentSelectItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(studentName)
-        Button(onClick = { onSelect(studentId) }) {
-            Text("Select")
+        Button(
+            onClick = { onSelect(studentId) },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = if (isSelected) Color.Green else Color.Blue
+            )
+        ) {
+            Text(if (isSelected) "Selected" else "Select")
         }
     }
 }

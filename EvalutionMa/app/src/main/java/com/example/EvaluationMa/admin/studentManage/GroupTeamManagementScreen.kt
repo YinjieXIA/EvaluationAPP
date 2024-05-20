@@ -142,12 +142,6 @@ fun GroupTeamManagementScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = { navController.navigate("add_team/$selectedGroupId") }) {
-                Text("Add Team")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             if (selectedTeamId != null) {
                 Text("Students", style = MaterialTheme.typography.h6)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -184,16 +178,22 @@ fun GroupTeamManagementScreen(navController: NavController) {
                     Text("Add Student")
                 }
             }
-        }
 
-        if (errorMessage.isNotEmpty()) {
-            Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { navController.navigate("add_team/$selectedGroupId") }) {
+                Text("Add Team")
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = { navController.navigate("add_group") }) {
             Text("Add Group")
+        }
+
+        if (errorMessage.isNotEmpty()) {
+            Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
         }
     }
 }
