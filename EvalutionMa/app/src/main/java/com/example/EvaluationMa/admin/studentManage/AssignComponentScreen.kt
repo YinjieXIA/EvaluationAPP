@@ -57,7 +57,7 @@ fun AssignComponentScreen(navController: NavController, groupId: String) {
         if (components.isNotEmpty()) {
             LazyColumn {
                 items(components) { component ->
-                    ComponentSelectItem(
+                    ComponentChip(
                         component = component,
                         isSelected = selectedComponentIds.contains(component["uid"] as String),
                         onSelect = { componentId ->
@@ -85,8 +85,9 @@ fun AssignComponentScreen(navController: NavController, groupId: String) {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ComponentSelectItem(
+fun ComponentChip(
     component: Map<String, Any>,
     isSelected: Boolean,
     onSelect: (String) -> Unit
@@ -94,21 +95,14 @@ fun ComponentSelectItem(
     val componentId = component["uid"] as? String ?: ""
     val componentName = component["name"] as? String ?: ""
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Chip(
+        onClick = { onSelect(componentId) },
+        colors = ChipDefaults.chipColors(
+            backgroundColor = if (isSelected) Color.Blue else Color.Gray,
+            contentColor = Color.White
+        ),
+        modifier = Modifier.padding(4.dp)
     ) {
         Text(componentName)
-        Button(
-            onClick = { onSelect(componentId) },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = if (isSelected) Color.Green else Color.White
-            )
-        ) {
-            Text(if (isSelected) "Selected" else "Select")
-        }
     }
 }
