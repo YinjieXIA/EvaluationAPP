@@ -13,9 +13,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.EvaluationMa.admin.ComponentManagementScreen
+import com.example.EvaluationMa.comanage.ComponentManagementScreen
 import com.example.EvaluationMa.admin.ModuleManageScreen
-import com.example.EvaluationMa.admin.SkillManagementScreen
+import com.example.EvaluationMa.comanage.SkillManagementScreen
 import com.example.EvaluationMa.auth.LoginScreen
 import com.example.EvaluationMa.auth.RegisterScreen
 import com.example.EvaluationMa.auth.ForgotPasswordScreen
