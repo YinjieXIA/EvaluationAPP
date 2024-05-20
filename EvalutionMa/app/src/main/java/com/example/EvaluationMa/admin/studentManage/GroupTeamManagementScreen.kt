@@ -20,6 +20,12 @@ fun GroupTeamManagementScreen(navController: NavController) {
     var teams by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
     var selectedTeamId by remember { mutableStateOf<String?>(null) }
     var students by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
+    var clients by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
+    var components by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
+    var tutors by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
+    var selectedClientId by remember { mutableStateOf<String?>(null) }
+    var selectedComponentIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var selectedTutorIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var errorMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -33,6 +39,42 @@ fun GroupTeamManagementScreen(navController: NavController) {
             }
             .addOnFailureListener { e ->
                 errorMessage = "Error fetching groups: $e"
+            }
+
+        db.collection("users").whereEqualTo("role", "client").get()
+            .addOnSuccessListener { result ->
+                clients = result.documents.mapNotNull { document ->
+                    val data = document.data
+                    data?.put("uid", document.id)
+                    data
+                }
+            }
+            .addOnFailureListener { e ->
+                errorMessage = "Error fetching clients: $e"
+            }
+
+        db.collection("components").get()
+            .addOnSuccessListener { result ->
+                components = result.documents.mapNotNull { document ->
+                    val data = document.data
+                    data?.put("uid", document.id)
+                    data
+                }
+            }
+            .addOnFailureListener { e ->
+                errorMessage = "Error fetching components: $e"
+            }
+
+        db.collection("users").whereEqualTo("role", "tutor").get()
+            .addOnSuccessListener { result ->
+                tutors = result.documents.mapNotNull { document ->
+                    val data = document.data
+                    data?.put("uid", document.id)
+                    data
+                }
+            }
+            .addOnFailureListener { e ->
+                errorMessage = "Error fetching tutors: $e"
             }
     }
 
@@ -61,6 +103,36 @@ fun GroupTeamManagementScreen(navController: NavController) {
             }
             .addOnFailureListener { e ->
                 errorMessage = "Error fetching students: $e"
+            }
+    }
+
+    fun assignClient(groupId: String, clientId: String) {
+        db.collection("groups").document(groupId).update("client", clientId)
+            .addOnSuccessListener {
+                errorMessage = "Client assigned successfully"
+            }
+            .addOnFailureListener { e ->
+                errorMessage = "Error assigning client: $e"
+            }
+    }
+
+    fun assignComponents(groupId: String, componentIds: Set<String>) {
+        db.collection("groups").document(groupId).update("components", componentIds.toList())
+            .addOnSuccessListener {
+                errorMessage = "Components assigned successfully"
+            }
+            .addOnFailureListener { e ->
+                errorMessage = "Error assigning components: $e"
+            }
+    }
+
+    fun assignTutors(teamId: String, tutorIds: Set<String>) {
+        db.collection("groups").document(selectedGroupId!!).collection("teams").document(teamId).update("tutors", tutorIds.toList())
+            .addOnSuccessListener {
+                errorMessage = "Tutors assigned successfully"
+            }
+            .addOnFailureListener { e ->
+                errorMessage = "Error assigning tutors: $e"
             }
     }
 
@@ -97,6 +169,14 @@ fun GroupTeamManagementScreen(navController: NavController) {
                                 .addOnFailureListener { e ->
                                     errorMessage = "Error deleting group: $e"
                                 }
+                        },
+                        onAssignClient = { groupId ->
+                            selectedGroupId = groupId
+                            selectedClientId = null
+                        },
+                        onAssignComponent = { groupId ->
+                            selectedGroupId = groupId
+                            selectedComponentIds = emptySet()
                         }
                     )
                 }
@@ -132,6 +212,10 @@ fun GroupTeamManagementScreen(navController: NavController) {
                                     .addOnFailureListener { e ->
                                         errorMessage = "Error deleting team: $e"
                                     }
+                            },
+                            onAssignTutor = { teamId ->
+                                selectedTeamId = teamId
+                                selectedTutorIds = emptySet()
                             }
                         )
                     }
@@ -177,6 +261,35 @@ fun GroupTeamManagementScreen(navController: NavController) {
                 Button(onClick = { navController.navigate("add_student/$selectedGroupId/$selectedTeamId") }) {
                     Text("Add Student")
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("Assign Tutors", style = MaterialTheme.typography.h6)
+                Spacer(modifier = Modifier.height(8.dp))
+                if (tutors.isNotEmpty()) {
+                    LazyColumn {
+                        items(tutors) { tutor ->
+                            TutorSelectItem(
+                                tutor = tutor,
+                                isSelected = selectedTutorIds.contains(tutor["uid"] as String),
+                                onSelect = { tutorId ->
+                                    selectedTutorIds = if (selectedTutorIds.contains(tutorId)) {
+                                        selectedTutorIds - tutorId
+                                    } else {
+                                        selectedTutorIds + tutorId
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    Button(onClick = {
+                        assignTutors(selectedTeamId!!, selectedTutorIds)
+                    }) {
+                        Text("Assign Tutors")
+                    }
+                } else {
+                    Text("No tutors available.")
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -192,6 +305,64 @@ fun GroupTeamManagementScreen(navController: NavController) {
             Text("Add Group")
         }
 
+        if (selectedGroupId != null) {
+            // 分配客户
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Assign Client", style = MaterialTheme.typography.h6)
+            Spacer(modifier = Modifier.height(8.dp))
+            if (clients.isNotEmpty()) {
+                LazyColumn {
+                    items(clients) { client ->
+                        ClientSelectItem(
+                            client = client,
+                            isSelected = selectedClientId == client["uid"],
+                            onSelect = { clientId ->
+                                selectedClientId = clientId
+                            }
+                        )
+                    }
+                }
+                Button(onClick = {
+                    selectedClientId?.let { clientId ->
+                        assignClient(selectedGroupId!!, clientId)
+                    }
+                }) {
+                    Text("Assign Client")
+                }
+            } else {
+                Text("No clients available.")
+            }
+
+            // 分配组件
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Assign Components", style = MaterialTheme.typography.h6)
+            Spacer(modifier = Modifier.height(8.dp))
+            if (components.isNotEmpty()) {
+                LazyColumn {
+                    items(components) { component ->
+                        ComponentSelectItem(
+                            component = component,
+                            isSelected = selectedComponentIds.contains(component["uid"] as String),
+                            onSelect = { componentId ->
+                                selectedComponentIds = if (selectedComponentIds.contains(componentId)) {
+                                    selectedComponentIds - componentId
+                                } else {
+                                    selectedComponentIds + componentId
+                                }
+                            }
+                        )
+                    }
+                }
+                Button(onClick = {
+                    assignComponents(selectedGroupId!!, selectedComponentIds)
+                }) {
+                    Text("Assign Components")
+                }
+            } else {
+                Text("No components available.")
+            }
+        }
+
         if (errorMessage.isNotEmpty()) {
             Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
         }
@@ -202,7 +373,9 @@ fun GroupTeamManagementScreen(navController: NavController) {
 fun GroupItem(
     group: Map<String, Any>,
     onEdit: (String) -> Unit,
-    onDelete: (String) -> Unit
+    onDelete: (String) -> Unit,
+    onAssignClient: (String) -> Unit,
+    onAssignComponent: (String) -> Unit
 ) {
     val groupId = group["uid"] as? String ?: ""
     val groupName = group["name"] as? String ?: ""
@@ -223,6 +396,70 @@ fun GroupItem(
             Button(onClick = { onDelete(groupId) }) {
                 Text("Delete")
             }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { onAssignClient(groupId) }) {
+                Text("Assign Client")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { onAssignComponent(groupId) }) {
+                Text("Assign Component")
+            }
+        }
+    }
+}
+
+@Composable
+fun ClientSelectItem(
+    client: Map<String, Any>,
+    isSelected: Boolean,
+    onSelect: (String) -> Unit
+) {
+    val clientId = client["uid"] as? String ?: ""
+    val clientName = "${client["firstName"]} ${client["lastName"]}"
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(clientName)
+        Button(
+            onClick = { onSelect(clientId) },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = if (isSelected) Color.Green else Color.Blue
+            )
+        ) {
+            Text(if (isSelected) "Selected" else "Select")
+        }
+    }
+}
+
+@Composable
+fun ComponentSelectItem(
+    component: Map<String, Any>,
+    isSelected: Boolean,
+    onSelect: (String) -> Unit
+) {
+    val componentId = component["uid"] as? String ?: ""
+    val componentName = component["name"] as? String ?: ""
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(componentName)
+        Button(
+            onClick = { onSelect(componentId) },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = if (isSelected) Color.Green else Color.Blue
+            )
+        ) {
+            Text(if (isSelected) "Selected" else "Select")
         }
     }
 }
@@ -231,7 +468,8 @@ fun GroupItem(
 fun TeamItem(
     team: Map<String, Any>,
     onEdit: (String) -> Unit,
-    onDelete: (String) -> Unit
+    onDelete: (String) -> Unit,
+    onAssignTutor: (String) -> Unit
 ) {
     val teamId = team["uid"] as? String ?: ""
     val teamName = team["name"] as? String ?: ""
@@ -252,9 +490,14 @@ fun TeamItem(
             Button(onClick = { onDelete(teamId) }) {
                 Text("Delete")
             }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { onAssignTutor(teamId) }) {
+                Text("Assign Tutor")
+            }
         }
     }
 }
+
 
 @Composable
 fun StudentItem(
@@ -284,3 +527,32 @@ fun StudentItem(
         }
     }
 }
+
+@Composable
+fun TutorSelectItem(
+    tutor: Map<String, Any>,
+    isSelected: Boolean,
+    onSelect: (String) -> Unit
+) {
+    val tutorId = tutor["uid"] as? String ?: ""
+    val tutorName = "${tutor["firstName"]} ${tutor["lastName"]}"
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(tutorName)
+        Button(
+            onClick = { onSelect(tutorId) },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = if (isSelected) Color.Green else Color.Blue
+            )
+        ) {
+            Text(if (isSelected) "Selected" else "Select")
+        }
+    }
+}
+
