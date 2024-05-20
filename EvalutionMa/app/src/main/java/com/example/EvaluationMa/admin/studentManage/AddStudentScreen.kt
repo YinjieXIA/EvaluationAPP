@@ -16,17 +16,50 @@ import com.google.firebase.firestore.FirebaseFirestore
 fun AddStudentScreen(navController: NavController, groupId: String, teamId: String) {
     val db = FirebaseFirestore.getInstance()
     var students by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
+    var availableStudents by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
     var selectedStudentId by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        db.collection("users").whereEqualTo("role", "student").whereEqualTo("group", null).get()
+        db.collection("users").whereEqualTo("role", "student").get()
             .addOnSuccessListener { result ->
-                students = result.documents.mapNotNull { document ->
+                val allStudents = result.documents.mapNotNull { document ->
                     val data = document.data
                     data?.put("uid", document.id)
                     data
                 }
+
+                db.collection("groups").get()
+                    .addOnSuccessListener { groupResult ->
+                        val assignedStudentIds = mutableSetOf<String>()
+                        groupResult.documents.forEach { groupDocument ->
+                            db.collection("groups").document(groupDocument.id).collection("teams").get()
+                                .addOnSuccessListener { teamResult ->
+                                    teamResult.documents.forEach { teamDocument ->
+                                        db.collection("groups").document(groupDocument.id).collection("teams").document(teamDocument.id).collection("students").get()
+                                            .addOnSuccessListener { studentResult ->
+                                                studentResult.documents.forEach { studentDocument ->
+                                                    assignedStudentIds.add(studentDocument.id)
+                                                }
+
+                                                // 筛选未分配的学生
+                                                availableStudents = allStudents.filter { student ->
+                                                    !assignedStudentIds.contains(student["uid"])
+                                                }
+                                            }
+                                            .addOnFailureListener { e ->
+                                                errorMessage = "Error fetching assigned students: $e"
+                                            }
+                                    }
+                                }
+                                .addOnFailureListener { e ->
+                                    errorMessage = "Error fetching teams: $e"
+                                }
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        errorMessage = "Error fetching groups: $e"
+                    }
             }
             .addOnFailureListener { e ->
                 errorMessage = "Error fetching students: $e"
@@ -43,9 +76,9 @@ fun AddStudentScreen(navController: NavController, groupId: String, teamId: Stri
         Text("Add Student to Team", style = MaterialTheme.typography.h5)
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (students.isNotEmpty()) {
+        if (availableStudents.isNotEmpty()) {
             LazyColumn {
-                items(students) { student ->
+                items(availableStudents) { student ->
                     StudentSelectItem(student, onSelect = { studentId ->
                         selectedStudentId = studentId
                     })

@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun StudentDetailScreen(navController: NavController, studentId: String) {
     val db = FirebaseFirestore.getInstance()
@@ -17,6 +18,8 @@ fun StudentDetailScreen(navController: NavController, studentId: String) {
     var teams by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
     var selectedGroup by remember { mutableStateOf<String?>(null) }
     var selectedTeam by remember { mutableStateOf<String?>(null) }
+    var groupExpanded by remember { mutableStateOf(false) }
+    var teamExpanded by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(studentId) {
@@ -78,16 +81,37 @@ fun StudentDetailScreen(navController: NavController, studentId: String) {
             Text("Change Group")
             Spacer(modifier = Modifier.height(8.dp))
 
-            DropdownMenu(
-                expanded = selectedGroup != null,
-                onDismissRequest = { selectedGroup = null }
+            ExposedDropdownMenuBox(
+                expanded = groupExpanded,
+                onExpandedChange = {
+                    groupExpanded = !groupExpanded
+                }
             ) {
-                groups.forEach { group ->
-                    DropdownMenuItem(onClick = {
-                        selectedGroup = group["uid"] as String
-                        loadTeams(selectedGroup!!)
-                    }) {
-                        Text(group["name"] as String)
+                TextField(
+                    value = selectedGroup?.let { groupId ->
+                        groups.find { it["uid"] == groupId }?.get("name") as String? ?: "Select Group"
+                    } ?: "Select Group",
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(
+                            expanded = groupExpanded
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = groupExpanded,
+                    onDismissRequest = { groupExpanded = false }
+                ) {
+                    groups.forEach { group ->
+                        DropdownMenuItem(onClick = {
+                            selectedGroup = group["uid"] as String
+                            loadTeams(selectedGroup!!)
+                            groupExpanded = false
+                        }) {
+                            Text(group["name"] as String)
+                        }
                     }
                 }
             }
@@ -98,15 +122,36 @@ fun StudentDetailScreen(navController: NavController, studentId: String) {
                 Text("Change Team")
                 Spacer(modifier = Modifier.height(8.dp))
 
-                DropdownMenu(
-                    expanded = selectedTeam != null,
-                    onDismissRequest = { selectedTeam = null }
+                ExposedDropdownMenuBox(
+                    expanded = teamExpanded,
+                    onExpandedChange = {
+                        teamExpanded = !teamExpanded
+                    }
                 ) {
-                    teams.forEach { team ->
-                        DropdownMenuItem(onClick = {
-                            selectedTeam = team["uid"] as String
-                        }) {
-                            Text(team["name"] as String)
+                    TextField(
+                        value = selectedTeam?.let { teamId ->
+                            teams.find { it["uid"] == teamId }?.get("name") as String? ?: "Select Team"
+                        } ?: "Select Team",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = teamExpanded
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = teamExpanded,
+                        onDismissRequest = { teamExpanded = false }
+                    ) {
+                        teams.forEach { team ->
+                            DropdownMenuItem(onClick = {
+                                selectedTeam = team["uid"] as String
+                                teamExpanded = false
+                            }) {
+                                Text(team["name"] as String)
+                            }
                         }
                     }
                 }
