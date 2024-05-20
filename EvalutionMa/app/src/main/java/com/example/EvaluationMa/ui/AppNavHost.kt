@@ -29,6 +29,7 @@ import com.example.EvaluationMa.admin.studentManage.StudentManagementScreen
 import com.example.EvaluationMa.admin.studentManage.AssignClientScreen
 import com.example.EvaluationMa.admin.studentManage.AssignComponentScreen
 import com.example.EvaluationMa.admin.studentManage.AssignTutorScreen
+import com.example.EvaluationMa.comanage.ComponentDetailScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -68,6 +69,13 @@ fun AppNavHost() {
         composable("verify_users") { UserVerificationScreen(navController) }
         composable("module_manage") { ModuleManageScreen(navController) }
         composable("manage_components") { ComponentManagementScreen(navController) }
+        composable(
+            route = "component_detail/{componentId}",
+            arguments = listOf(navArgument("componentId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            ComponentDetailScreen(navController, componentId)
+        }
         composable(
             route = "manage_skills/{componentId}",
             arguments = listOf(navArgument("componentId") { type = NavType.StringType })

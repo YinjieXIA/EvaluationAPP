@@ -152,6 +152,8 @@ fun ComponentManagementScreen(navController: NavController) {
                         }
                 }, onManageSkills = {
                     navController.navigate("manage_skills/${component.id}")
+                }, onViewDetails = {
+                    navController.navigate("component_detail/${component.id}")
                 })
             }
         }
@@ -163,7 +165,7 @@ fun ComponentManagementScreen(navController: NavController) {
 }
 
 @Composable
-fun ComponentItem(component: Component, onEdit: (Component) -> Unit, onDelete: () -> Unit, onManageSkills: () -> Unit) {
+fun ComponentItem(component: Component, onEdit: (Component) -> Unit, onDelete: () -> Unit, onManageSkills: () -> Unit, onViewDetails: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -185,7 +187,10 @@ fun ComponentItem(component: Component, onEdit: (Component) -> Unit, onDelete: (
                     Text("Delete")
                 }
                 Button(onClick = { onManageSkills() }) {
-                    Text("Manage Skills")
+                    Text("Skills")
+                }
+                Button(onClick = { onViewDetails() }) {
+                    Text("Details")
                 }
             }
         }
