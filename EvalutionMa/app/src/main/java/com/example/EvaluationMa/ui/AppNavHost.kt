@@ -29,6 +29,7 @@ import com.example.EvaluationMa.admin.studentManage.StudentManagementScreen
 import com.example.EvaluationMa.admin.studentManage.AssignClientScreen
 import com.example.EvaluationMa.admin.studentManage.AssignComponentScreen
 import com.example.EvaluationMa.admin.studentManage.AssignTutorScreen
+import com.example.EvaluationMa.profile.ProfileScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -66,6 +67,7 @@ fun AppNavHost() {
 //            }
 //        }
         composable("verify_users") { UserVerificationScreen(navController) }
+        composable("profile") { ProfileScreen(navController) }
         composable("module_manage") { ModuleManageScreen(navController) }
         composable("manage_components") { ComponentManagementScreen(navController) }
         composable(

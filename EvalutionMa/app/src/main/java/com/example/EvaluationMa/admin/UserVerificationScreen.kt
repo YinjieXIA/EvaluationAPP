@@ -37,6 +37,22 @@ fun UserVerificationScreen(navController: NavController) {
             }
     }
 
+    fun generateStudentId(onSuccess: (Int) -> Unit, onFailure: (Exception) -> Unit) {
+        val counterRef = db.collection("studentIdCounter").document("counter")
+
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(counterRef)
+            val currentId = snapshot.getLong("currentId")?.toInt() ?: 1000
+            val newId = currentId + 1
+            transaction.update(counterRef, "currentId", newId)
+            newId
+        }.addOnSuccessListener { newId ->
+            onSuccess(newId)
+        }.addOnFailureListener { e ->
+            onFailure(e)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,16 +65,37 @@ fun UserVerificationScreen(navController: NavController) {
             LazyColumn {
                 items(unverifiedUsers) { user ->
                     UserItem(user, onVerify = { userId, role ->
-                        db.collection("users").document(userId)
-                            .update(mapOf("verified" to true, "role" to role))
-                            .addOnSuccessListener {
-                                unverifiedUsers = unverifiedUsers.filterNot { it["uid"] == userId }
-                                Log.d("UserVerificationScreen", "Verified user: $userId with role: $role")
-                            }
-                            .addOnFailureListener { e ->
-                                errorMessage = "Error verifying user: $e"
-                                Log.e("UserVerificationScreen", errorMessage)
-                            }
+                        if (role == "student") {
+                            generateStudentId(
+                                onSuccess = { studentId ->
+                                    db.collection("users").document(userId)
+                                        .update(mapOf("verified" to true, "role" to role, "studentId" to studentId))
+                                        .addOnSuccessListener {
+                                            unverifiedUsers = unverifiedUsers.filterNot { it["uid"] == userId }
+                                            Log.d("UserVerificationScreen", "Verified student user: $userId with studentId: $studentId")
+                                        }
+                                        .addOnFailureListener { e ->
+                                            errorMessage = "Error verifying student user: $e"
+                                            Log.e("UserVerificationScreen", errorMessage)
+                                        }
+                                },
+                                onFailure = { e ->
+                                    errorMessage = "Error generating studentId: $e"
+                                    Log.e("UserVerificationScreen", errorMessage)
+                                }
+                            )
+                        } else {
+                            db.collection("users").document(userId)
+                                .update(mapOf("verified" to true, "role" to role))
+                                .addOnSuccessListener {
+                                    unverifiedUsers = unverifiedUsers.filterNot { it["uid"] == userId }
+                                    Log.d("UserVerificationScreen", "Verified user: $userId with role: $role")
+                                }
+                                .addOnFailureListener { e ->
+                                    errorMessage = "Error verifying user: $e"
+                                    Log.e("UserVerificationScreen", errorMessage)
+                                }
+                        }
                     })
                 }
             }

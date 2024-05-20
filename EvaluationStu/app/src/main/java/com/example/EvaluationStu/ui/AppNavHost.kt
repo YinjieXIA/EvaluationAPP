@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.EvaluationStu.auth.LoginScreen
 import com.example.EvaluationStu.auth.RegisterScreen
 import com.example.EvaluationStu.auth.ForgotPasswordScreen
+import com.example.EvaluationStu.profile.StudentProfileScreen
 
 @Composable
 fun AppNavHost() {
@@ -25,6 +26,7 @@ fun AppNavHost() {
         composable("register") { RegisterScreen(navController) }
         composable("forgot_password") { ForgotPasswordScreen(navController) }
         composable("student_home") { StudentHomeScreen(navController) } // 学生端主页
+        composable("student_profile") { StudentProfileScreen(navController) }
     }
 }
 
