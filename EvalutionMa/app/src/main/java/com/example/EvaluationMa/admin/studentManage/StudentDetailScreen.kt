@@ -20,9 +20,13 @@ fun StudentDetailScreen(navController: NavController, studentId: String) {
     var errorMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(studentId) {
-        db.collection("students").document(studentId).get()
+        db.collection("users").document(studentId).get()
             .addOnSuccessListener { document ->
-                student = document.data
+                if (document.getString("role") == "student") {
+                    student = document.data
+                } else {
+                    errorMessage = "The specified user is not a student."
+                }
             }
             .addOnFailureListener { e ->
                 errorMessage = "Error fetching student: $e"
@@ -111,7 +115,7 @@ fun StudentDetailScreen(navController: NavController, studentId: String) {
 
                 Button(onClick = {
                     if (selectedGroup != null && selectedTeam != null) {
-                        db.collection("students").document(studentId)
+                        db.collection("users").document(studentId)
                             .update(mapOf("group" to selectedGroup, "team" to selectedTeam))
                             .addOnSuccessListener {
                                 student = student!!.toMutableMap().apply {

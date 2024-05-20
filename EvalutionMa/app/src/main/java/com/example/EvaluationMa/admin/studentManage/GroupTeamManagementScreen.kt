@@ -18,6 +18,7 @@ fun GroupTeamManagementScreen(navController: NavController) {
     var groups by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
     var selectedGroupId by remember { mutableStateOf<String?>(null) }
     var teams by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
+    var selectedTeamId by remember { mutableStateOf<String?>(null) }
     var students by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
     var errorMessage by remember { mutableStateOf("") }
 
@@ -78,6 +79,9 @@ fun GroupTeamManagementScreen(navController: NavController) {
                         group = group,
                         onEdit = { groupId ->
                             selectedGroupId = groupId
+                            selectedTeamId = null
+                            teams = emptyList()
+                            students = emptyList()
                             loadTeams(groupId)
                         },
                         onDelete = { groupId ->
@@ -113,13 +117,17 @@ fun GroupTeamManagementScreen(navController: NavController) {
                         TeamItem(
                             team = team,
                             onEdit = { teamId ->
+                                selectedTeamId = teamId
                                 loadStudents(selectedGroupId!!, teamId)
                             },
                             onDelete = { teamId ->
                                 db.collection("groups").document(selectedGroupId!!).collection("teams").document(teamId).delete()
                                     .addOnSuccessListener {
                                         teams = teams.filterNot { it["uid"] == teamId }
-                                        students = emptyList()
+                                        if (selectedTeamId == teamId) {
+                                            selectedTeamId = null
+                                            students = emptyList()
+                                        }
                                     }
                                     .addOnFailureListener { e ->
                                         errorMessage = "Error deleting team: $e"
@@ -137,35 +145,41 @@ fun GroupTeamManagementScreen(navController: NavController) {
             Button(onClick = { navController.navigate("add_team/$selectedGroupId") }) {
                 Text("Add Team")
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        if (students.isNotEmpty()) {
-            Text("Students", style = MaterialTheme.typography.h6)
-            Spacer(modifier = Modifier.height(8.dp))
+            if (selectedTeamId != null && students.isNotEmpty()) {
+                Text("Students", style = MaterialTheme.typography.h6)
+                Spacer(modifier = Modifier.height(8.dp))
 
-            LazyColumn {
-                items(students) { student ->
-                    StudentItem(
-                        student = student,
-                        onEdit = { studentId ->
-                            navController.navigate("student_detail/$studentId")
-                        },
-                        onDelete = { studentId ->
-                            db.collection("groups").document(selectedGroupId!!).collection("teams").document(student["teamId"] as String).collection("students").document(studentId).delete()
-                                .addOnSuccessListener {
-                                    students = students.filterNot { it["uid"] == studentId }
-                                }
-                                .addOnFailureListener { e ->
-                                    errorMessage = "Error deleting student: $e"
-                                }
-                        }
-                    )
+                LazyColumn {
+                    items(students) { student ->
+                        StudentItem(
+                            student = student,
+                            onEdit = { studentId ->
+                                navController.navigate("student_detail/$studentId")
+                            },
+                            onDelete = { studentId ->
+                                db.collection("groups").document(selectedGroupId!!).collection("teams").document(selectedTeamId!!).collection("students").document(studentId).delete()
+                                    .addOnSuccessListener {
+                                        students = students.filterNot { it["uid"] == studentId }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        errorMessage = "Error deleting student: $e"
+                                    }
+                            }
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(onClick = { navController.navigate("add_student/$selectedGroupId/$selectedTeamId") }) {
+                    Text("Add Student")
+                }
+            } else {
+                Text("No students found.")
             }
-        } else {
-            Text("No students found.")
         }
 
         if (errorMessage.isNotEmpty()) {

@@ -13,13 +13,14 @@ import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun StudentManagementScreen(navController: NavController) {
+fun AddStudentScreen(navController: NavController, groupId: String, teamId: String) {
     val db = FirebaseFirestore.getInstance()
     var students by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
+    var selectedStudentId by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        db.collection("users").whereEqualTo("role", "student").get()
+        db.collection("users").whereEqualTo("role", "student").whereEqualTo("group", null).get()
             .addOnSuccessListener { result ->
                 students = result.documents.mapNotNull { document ->
                     val data = document.data
@@ -35,37 +36,57 @@ fun StudentManagementScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Student Management", style = MaterialTheme.typography.h5)
+        Text("Add Student to Team", style = MaterialTheme.typography.h5)
         Spacer(modifier = Modifier.height(16.dp))
 
         if (students.isNotEmpty()) {
             LazyColumn {
                 items(students) { student ->
-                    StudentItem(student, onEdit = { studentId ->
-                        navController.navigate("student_detail/$studentId")
+                    StudentSelectItem(student, onSelect = { studentId ->
+                        selectedStudentId = studentId
                     })
                 }
             }
         } else {
-            Text("No students found.")
+            Text("No students available.")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = {
+            if (selectedStudentId != null) {
+                db.collection("groups").document(groupId).collection("teams").document(teamId).collection("students").document(selectedStudentId!!).set(mapOf("uid" to selectedStudentId))
+                    .addOnSuccessListener {
+                        db.collection("users").document(selectedStudentId!!).update(mapOf("group" to groupId, "team" to teamId))
+                            .addOnSuccessListener {
+                                navController.popBackStack()
+                            }
+                            .addOnFailureListener { e ->
+                                errorMessage = "Error updating student: $e"
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        errorMessage = "Error adding student: $e"
+                    }
+            }
+        }) {
+            Text("Add Student")
         }
 
         if (errorMessage.isNotEmpty()) {
             Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
         }
-
-//        Button(onClick = { navController.navigate("add_student") }) {
-//            Text("Add Student")
-//        }
     }
 }
 
 @Composable
-fun StudentItem(
+fun StudentSelectItem(
     student: Map<String, Any>,
-    onEdit: (String) -> Unit
+    onSelect: (String) -> Unit
 ) {
     val studentId = student["uid"] as? String ?: ""
     val studentName = "${student["firstName"]} ${student["lastName"]}"
@@ -78,8 +99,8 @@ fun StudentItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(studentName)
-        Button(onClick = { onEdit(studentId) }) {
-            Text("Edit")
+        Button(onClick = { onSelect(studentId) }) {
+            Text("Select")
         }
     }
 }
