@@ -20,6 +20,12 @@ import com.example.EvaluationMa.auth.LoginScreen
 import com.example.EvaluationMa.auth.RegisterScreen
 import com.example.EvaluationMa.auth.ForgotPasswordScreen
 import com.example.EvaluationMa.admin.UserVerificationScreen
+import com.example.EvaluationMa.admin.studentManage.AddGroupScreen
+import com.example.EvaluationMa.admin.studentManage.AddStudentScreen
+import com.example.EvaluationMa.admin.studentManage.AddTeamScreen
+import com.example.EvaluationMa.admin.studentManage.GroupTeamManagementScreen
+import com.example.EvaluationMa.admin.studentManage.StudentDetailScreen
+import com.example.EvaluationMa.admin.studentManage.StudentManagementScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -103,7 +109,18 @@ fun AppNavHost() {
                 NoPermissionScreen()
             }
         }
-        // 添加其他页面
+        composable(
+            route = "add_student/{groupId}/{teamId}",
+            arguments = listOf(
+                navArgument("groupId") { type = NavType.StringType },
+                navArgument("teamId") { type = NavType.StringType }
+            )
+        ) {backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            val teamId = backStackEntry.arguments?.getString("teamId") ?: ""
+            AddStudentScreen(navController, groupId, teamId)
+        }
+        // 添加其他
     }
 }
 

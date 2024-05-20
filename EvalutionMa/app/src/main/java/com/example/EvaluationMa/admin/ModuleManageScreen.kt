@@ -13,7 +13,7 @@ import androidx.navigation.NavController
 
 @Composable
 fun ModuleManageScreen(navController: NavController) {
-    val adminOptions = listOf("Verify User Registrations", "Manage Components")
+    val adminOptions = listOf("Verify User Registrations", "Manage Components","Manage Group team","Manage Student")
 
     Column(
         modifier = Modifier
@@ -29,6 +29,9 @@ fun ModuleManageScreen(navController: NavController) {
                     when (option) {
                         "Verify User Registrations" -> navController.navigate("verify_users")
                         "Manage Components" -> navController.navigate("manage_components")
+                        "Manage Group team" -> navController.navigate("group_team_management")
+                        "Manage Student" -> navController.navigate("student_management")
+
                     }
                 })
             }

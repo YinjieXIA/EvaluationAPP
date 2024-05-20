@@ -11,17 +11,21 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
 
-data class Component(val id: String = "", val name: String = "", val description: String = "")
+data class Component(val id: String = "", val name: String = "", val description: String = "", val comanegerId: String = "")
+data class User(val uid: String = "", val email: String = "", val role: String = "", val verified: Boolean = false)
 
 @Composable
 fun ComponentManagementScreen(navController: NavController) {
     val db = FirebaseFirestore.getInstance()
     var components by remember { mutableStateOf<List<Component>>(emptyList()) }
+    var comanegers by remember { mutableStateOf<List<User>>(emptyList()) }
     var componentName by remember { mutableStateOf("") }
     var componentDescription by remember { mutableStateOf("") }
     var selectedComponent by remember { mutableStateOf<Component?>(null) }
+    var selectedComaneger by remember { mutableStateOf<User?>(null) }
     var errorMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -33,6 +37,17 @@ fun ComponentManagementScreen(navController: NavController) {
             }
             .addOnFailureListener { e ->
                 errorMessage = "Error fetching components: $e"
+                Log.e("ComponentManagementScreen", errorMessage)
+            }
+        // 获取教师列表
+        db.collection("users").whereEqualTo("role", "component_manager").whereEqualTo("verified", true).get()
+            .addOnSuccessListener { result ->
+                comanegers = result.documents.mapNotNull { document ->
+                    document.toObject(User::class.java)?.copy(uid = document.id)
+                }
+            }
+            .addOnFailureListener { e ->
+                errorMessage = "Error fetching comanegers: $e"
                 Log.e("ComponentManagementScreen", errorMessage)
             }
     }
@@ -58,15 +73,33 @@ fun ComponentManagementScreen(navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         )
 
+        // 教师选择
+        var expanded by remember { mutableStateOf(false) }
+        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            Text(selectedComaneger?.email ?: "Select a Component Manager", modifier = Modifier.fillMaxWidth().clickable { expanded = true })
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                comanegers.forEach { comaneger ->
+                    DropdownMenuItem(onClick = {
+                        selectedComaneger = comaneger
+                        expanded = false
+                    }) {
+                        Text(comaneger.email)
+                    }
+                }
+            }
+        }
+
+
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
-                val newComponent = Component(name = componentName, description = componentDescription)
+                val newComponent = Component(name = componentName, description = componentDescription, comanegerId = selectedComaneger?.uid ?: "")
                 db.collection("components").add(newComponent)
                     .addOnSuccessListener { documentReference ->
                         newComponent.copy(id = documentReference.id)
                         components = components + newComponent
                         componentName = ""
                         componentDescription = ""
+                        selectedComaneger = null
                     }
                     .addOnFailureListener { e ->
                         errorMessage = "Error adding component: $e"
@@ -77,7 +110,11 @@ fun ComponentManagementScreen(navController: NavController) {
             }
             Button(onClick = {
                 selectedComponent?.let { component ->
-                    val updatedComponent = component.copy(name = componentName, description = componentDescription)
+                    val updatedComponent = component.copy(
+                        name = componentName,
+                        description = componentDescription,
+                        comanegerId = selectedComaneger?.uid ?: component.comanegerId
+                    )
                     db.collection("components").document(component.id).set(updatedComponent)
                         .addOnSuccessListener {
                             components = components.map {
@@ -86,6 +123,7 @@ fun ComponentManagementScreen(navController: NavController) {
                             componentName = ""
                             componentDescription = ""
                             selectedComponent = null
+                            selectedComaneger = null
                         }
                         .addOnFailureListener { e ->
                             errorMessage = "Error updating component: $e"
@@ -99,7 +137,12 @@ fun ComponentManagementScreen(navController: NavController) {
 
         LazyColumn {
             items(components) { component ->
-                ComponentItem(component, onEdit = { selectedComponent = it; componentName = it.name; componentDescription = it.description }, onDelete = {
+                ComponentItem(component, onEdit = {
+                    selectedComponent = it
+                    componentName = it.name
+                    componentDescription = it.description
+                    selectedComaneger = comanegers.find { comaneger -> comaneger.uid == it.comanegerId }
+                }, onDelete = {
                     db.collection("components").document(component.id).delete()
                         .addOnSuccessListener {
                             components = components.filter { it.id != component.id }
@@ -128,26 +171,20 @@ fun ComponentItem(component: Component, onEdit: (Component) -> Unit, onDelete: (
             .padding(vertical = 8.dp),
         elevation = 4.dp
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(component.name, style = MaterialTheme.typography.body1)
-                Text(component.description, style = MaterialTheme.typography.body2)
-            }
-            Row {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(component.name, style = MaterialTheme.typography.body1)
+            Text(component.description, style = MaterialTheme.typography.body2)
+            Text("Component Manager ID: ${component.comanegerId}", style = MaterialTheme.typography.body2)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Button(onClick = { onEdit(component) }) {
                     Text("Edit")
                 }
-                Spacer(modifier = Modifier.width(8.dp))
                 Button(onClick = { onDelete() }) {
                     Text("Delete")
                 }
-                Spacer(modifier = Modifier.width(8.dp))
                 Button(onClick = { onManageSkills() }) {
                     Text("Manage Skills")
                 }
