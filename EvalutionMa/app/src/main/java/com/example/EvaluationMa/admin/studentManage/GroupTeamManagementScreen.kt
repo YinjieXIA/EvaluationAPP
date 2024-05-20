@@ -148,28 +148,34 @@ fun GroupTeamManagementScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (selectedTeamId != null && students.isNotEmpty()) {
+            if (selectedTeamId != null) {
                 Text("Students", style = MaterialTheme.typography.h6)
                 Spacer(modifier = Modifier.height(8.dp))
 
-                LazyColumn {
-                    items(students) { student ->
-                        StudentItem(
-                            student = student,
-                            onEdit = { studentId ->
-                                navController.navigate("student_detail/$studentId")
-                            },
-                            onDelete = { studentId ->
-                                db.collection("groups").document(selectedGroupId!!).collection("teams").document(selectedTeamId!!).collection("students").document(studentId).delete()
-                                    .addOnSuccessListener {
-                                        students = students.filterNot { it["uid"] == studentId }
-                                    }
-                                    .addOnFailureListener { e ->
-                                        errorMessage = "Error deleting student: $e"
-                                    }
-                            }
-                        )
+                if (students.isNotEmpty()) {
+                    LazyColumn {
+                        items(students) { student ->
+                            StudentItem(
+                                student = student,
+                                onEdit = { studentId ->
+                                    navController.navigate("student_detail/$studentId")
+                                },
+                                onDelete = { studentId ->
+                                    db.collection("groups").document(selectedGroupId!!)
+                                        .collection("teams").document(selectedTeamId!!)
+                                        .collection("students").document(studentId).delete()
+                                        .addOnSuccessListener {
+                                            students = students.filterNot { it["uid"] == studentId }
+                                        }
+                                        .addOnFailureListener { e ->
+                                            errorMessage = "Error deleting student: $e"
+                                        }
+                                }
+                            )
+                        }
                     }
+                } else {
+                    Text("No students found.")
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -177,8 +183,6 @@ fun GroupTeamManagementScreen(navController: NavController) {
                 Button(onClick = { navController.navigate("add_student/$selectedGroupId/$selectedTeamId") }) {
                     Text("Add Student")
                 }
-            } else {
-                Text("No students found.")
             }
         }
 
