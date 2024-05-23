@@ -22,11 +22,30 @@ fun StudentDetailScreen(navController: NavController, studentId: String) {
     var teamExpanded by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
+    fun loadTeams(groupId: String) {
+        db.collection("groups").document(groupId).collection("teams").get()
+            .addOnSuccessListener { result ->
+                teams = result.documents.mapNotNull { document ->
+                    val data = document.data
+                    data?.put("uid", document.id)
+                    data
+                }
+            }
+            .addOnFailureListener { e ->
+                errorMessage = "Error fetching teams: $e"
+            }
+    }
+
     LaunchedEffect(studentId) {
         db.collection("users").document(studentId).get()
             .addOnSuccessListener { document ->
                 if (document.getString("role") == "student") {
                     student = document.data
+                    val studentGroup = student?.get("group") as? String
+                    val studentTeam = student?.get("team") as? String
+                    selectedGroup = studentGroup
+                    selectedTeam = studentTeam
+                    studentGroup?.let { loadTeams(it) }
                 } else {
                     errorMessage = "The specified user is not a student."
                 }
@@ -48,20 +67,6 @@ fun StudentDetailScreen(navController: NavController, studentId: String) {
             }
     }
 
-    fun loadTeams(groupId: String) {
-        db.collection("groups").document(groupId).collection("teams").get()
-            .addOnSuccessListener { result ->
-                teams = result.documents.mapNotNull { document ->
-                    val data = document.data
-                    data?.put("uid", document.id)
-                    data
-                }
-            }
-            .addOnFailureListener { e ->
-                errorMessage = "Error fetching teams: $e"
-            }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,9 +78,11 @@ fun StudentDetailScreen(navController: NavController, studentId: String) {
         if (student != null) {
             Text("Name: ${student!!["firstName"]} ${student!!["lastName"]}")
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Current Group: ${student!!["group"] ?: "None"}")
+            val currentGroupName = groups.find { it["uid"] == student!!["group"] }?.get("name") ?: "None"
+            val currentTeamName = teams.find { it["uid"] == student!!["team"] }?.get("name") ?: "None"
+            Text("Current Group: $currentGroupName")
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Current Team: ${student!!["team"] ?: "None"}")
+            Text("Current Team: $currentTeamName")
             Spacer(modifier = Modifier.height(16.dp))
 
             Text("Change Group")
@@ -167,6 +174,7 @@ fun StudentDetailScreen(navController: NavController, studentId: String) {
                                     put("group", selectedGroup!!)
                                     put("team", selectedTeam!!)
                                 }
+                                navController.navigate("student_management") // 跳转回 StudentManagementScreen
                             }
                             .addOnFailureListener { e ->
                                 errorMessage = "Error updating student: $e"
