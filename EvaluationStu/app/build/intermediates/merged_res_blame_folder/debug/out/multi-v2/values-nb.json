@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.EvaluationStu.app-mergeDebugResources-70:/values-nb/values-nb.xml",
+            "outputFile": "com.example.EvaluationStu.app-mergeDebugResources-71:/values-nb/values-nb.xml",
             "map": [
                 {
                     "source": "C:\\Users\\安宇琪\\.gradle\\caches\\transforms-3\\be3ded4e25b142d097acb8920cb2a7fa\\transformed\\ui-release\\res\\values-nb\\values-nb.xml",

@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.EvaluationMa.app-mergeDebugResources-70:/values-pt-rPT/values-pt-rPT.xml",
+            "outputFile": "com.example.EvaluationMa.app-mergeDebugResources-71:/values-pt-rPT/values-pt-rPT.xml",
             "map": [
                 {
                     "source": "C:\\Users\\安宇琪\\.gradle\\caches\\transforms-3\\60a86cd991a016e585f1af658d14c41a\\transformed\\material-1.11.0\\res\\values-pt-rPT\\values-pt-rPT.xml",
