@@ -28,6 +28,11 @@ import com.example.EvaluationMa.admin.studentManage.StudentDetailScreen
 import com.example.EvaluationMa.admin.studentManage.StudentManagementScreen
 import com.example.EvaluationMa.admin.studentManage.AssignClientScreen
 import com.example.EvaluationMa.admin.studentManage.AssignComponentScreen
+import com.example.EvaluationMa.comanage.ComponentDetailScreen
+import com.example.EvaluationMa.comanage.ExamListScreen
+import com.example.EvaluationMa.comanage.ExamScoresScreen
+import com.example.EvaluationMa.comanage.MoreAnnouncementsScreen
+import com.example.EvaluationMa.comanage.StudentScoresScreen
 import com.example.EvaluationMa.profile.ProfileScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -69,6 +74,28 @@ fun AppNavHost() {
         composable("profile") { ProfileScreen(navController) }
         composable("module_manage") { ModuleManageScreen(navController) }
         composable("manage_components") { ComponentManagementScreen(navController) }
+        composable(
+            route = "component_detail/{componentId}",
+            arguments = listOf(navArgument("componentId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            ComponentDetailScreen(navController, componentId)
+        }
+        composable("student_scores/{componentId}") { backStackEntry ->
+            StudentScoresScreen(navController, backStackEntry.arguments?.getString("componentId") ?: "")
+        }
+        composable("exam_list/{componentId}") { backStackEntry ->
+            ExamListScreen(navController, backStackEntry.arguments?.getString("componentId") ?: "")
+        }
+        composable("exam_scores/{componentId}/{examName}") { backStackEntry ->
+            ExamScoresScreen(navController, backStackEntry.arguments?.getString("componentId") ?: "", backStackEntry.arguments?.getString("examName") ?: "")
+        }
+        composable("component_detail_more_announcements/{componentId}") { backStackEntry ->
+            val componentId = backStackEntry.arguments?.getString("componentId")
+            if (componentId != null) {
+                MoreAnnouncementsScreen(navController, componentId)
+            }
+        }
         composable(
             route = "manage_skills/{componentId}",
             arguments = listOf(navArgument("componentId") { type = NavType.StringType })
