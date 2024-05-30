@@ -9,9 +9,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -76,7 +83,7 @@ fun ExamScoresScreen(navController: NavController, componentId: String, examName
         Text("Exam Scores: $examName", style = MaterialTheme.typography.h5)
         Spacer(modifier = Modifier.height(16.dp))
 
-        ExamScoresTable(students, skills, studentScores, componentId, examName, db)
+        ExamScoresTable(students, skills, studentScores, componentId, examName, db, navController)
     }
 }
 
@@ -87,7 +94,8 @@ fun ExamScoresTable(
     studentScores: List<StudentScore>,
     componentId: String,
     examName: String,
-    db: FirebaseFirestore
+    db: FirebaseFirestore,
+    navController: NavController
 ) {
     var totalScores by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
     var editMode by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
@@ -164,7 +172,7 @@ fun ExamScoresTable(
                 Text(totalScore.toString(), modifier = Modifier.weight(1f))
 
                 if (editMode[studentId] == true) {
-                    Button(onClick = {
+                    IconButton(onClick = {
                         // 更新数据库中的分数
                         skills.forEach { skill ->
                             val skillId = skill.id
@@ -195,14 +203,21 @@ fun ExamScoresTable(
                         // 更新editMode状态
                         editMode = editMode.toMutableMap().apply { this[studentId] = false }
                     }) {
-                        Text("Save")
+                        Icon(imageVector = Icons.Default.Save, contentDescription = "Save")
                     }
                 } else {
-                    Button(onClick = {
+                    IconButton(onClick = {
                         // 更新editMode状态
                         editMode = editMode.toMutableMap().apply { this[studentId] = true }
                     }) {
-                        Text("Update")
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Update")
+                    }
+
+                    // 新增评价按钮
+                    IconButton(onClick = {
+                        navController.navigate("student_evaluation/$componentId/$examName/$studentId")
+                    }) {
+                        Icon(imageVector = Icons.Default.Comment, contentDescription = "Evaluate")
                     }
                 }
             }

@@ -32,6 +32,7 @@ import com.example.EvaluationMa.comanage.ComponentDetailScreen
 import com.example.EvaluationMa.comanage.ExamListScreen
 import com.example.EvaluationMa.comanage.ExamScoresScreen
 import com.example.EvaluationMa.comanage.MoreAnnouncementsScreen
+import com.example.EvaluationMa.comanage.StudentEvaluationScreen
 import com.example.EvaluationMa.comanage.StudentScoresScreen
 import com.example.EvaluationMa.profile.ProfileScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -95,6 +96,12 @@ fun AppNavHost() {
             if (componentId != null) {
                 MoreAnnouncementsScreen(navController, componentId)
             }
+        }
+        composable("student_evaluation/{componentId}/{examName}/{studentId}") { backStackEntry ->
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            val examName = backStackEntry.arguments?.getString("examName") ?: ""
+            val studentId = backStackEntry.arguments?.getString("studentId") ?: ""
+            StudentEvaluationScreen(navController, componentId, examName, studentId)
         }
         composable(
             route = "manage_skills/{componentId}",
