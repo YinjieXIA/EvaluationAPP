@@ -13,11 +13,10 @@ import android.util.Log
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.graphics.Color
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 
 data class Announcement(val id: String = "", val title: String = "", val content: String = "", val timestamp: Long = 0)
-
-
 
 @Composable
 fun ComponentDetailScreen(navController: NavController, componentId: String) {
@@ -26,6 +25,7 @@ fun ComponentDetailScreen(navController: NavController, componentId: String) {
     val currentUser = auth.currentUser
     var role by remember { mutableStateOf<String?>(null) }
     var announcements by remember { mutableStateOf<List<Announcement>>(emptyList()) }
+    var skills by remember { mutableStateOf<List<Skill>>(emptyList()) }
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -50,92 +50,108 @@ fun ComponentDetailScreen(navController: NavController, componentId: String) {
         }, onFailure = { e ->
             errorMessage = "Error fetching announcements: $e"
         })
+
+        // 获取技能
+        loadSkills(db, componentId, onSuccess = { result ->
+            skills = result
+        }, onFailure = { e ->
+            errorMessage = "Error fetching skills: $e"
+        })
     }
 
     if (errorMessage.isNotEmpty()) {
         Text(errorMessage, color = Color.Red, modifier = Modifier.padding(16.dp))
     }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("Component Details", style = MaterialTheme.typography.h5)
-        Spacer(modifier = Modifier.height(16.dp))
+        item {
+            Text("Component Details", style = MaterialTheme.typography.h5)
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // 公告模块
-        Text("Announcements", style = MaterialTheme.typography.h6)
-        Spacer(modifier = Modifier.height(8.dp))
-        LazyColumn {
-            items(announcements) { announcement ->
+            // 公告模块
+            Text("Announcements", style = MaterialTheme.typography.h6)
+            Spacer(modifier = Modifier.height(8.dp))
+            announcements.firstOrNull()?.let { announcement ->
                 AnnouncementItem(announcement)
             }
-        }
-        Button(onClick = {
-            navController.navigate("component_detail_more_announcements/$componentId")
-        }) {
-            Text("More")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 发布公告按钮 (仅限 component 管理员或总管理员)
-        if (role == "component_manager" || role == "module_manager") {
-            Button(onClick = { showPostAnnouncement = !showPostAnnouncement }) {
-                Text(if (showPostAnnouncement) "Hide Announcement Form" else "Post Announcement")
+            Button(onClick = {
+                navController.navigate("component_detail_more_announcements/$componentId")
+            }) {
+                Text("More")
             }
 
-            if (showPostAnnouncement) {
-                Spacer(modifier = Modifier.height(16.dp))
-                TextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Title") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                TextField(
-                    value = content,
-                    onValueChange = { content = it },
-                    label = { Text("Content") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Button(onClick = {
-                    val newAnnouncement = Announcement(title = title, content = content, timestamp = System.currentTimeMillis())
-                    db.collection("components").document(componentId).collection("announcements").add(newAnnouncement)
-                        .addOnSuccessListener {
-                            title = ""
-                            content = ""
-                            showPostAnnouncement = false
-                        }
-                        .addOnFailureListener { e ->
-                            errorMessage = "Error posting announcement: $e"
-                        }
-                }) {
-                    Text("Post")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 发布公告按钮 (仅限 component 管理员或总管理员)
+            if (role == "component_manager" || role == "module_manager") {
+                Button(onClick = { showPostAnnouncement = !showPostAnnouncement }) {
+                    Text(if (showPostAnnouncement) "Hide Announcement Form" else "Post Announcement")
                 }
-                if (errorMessage.isNotEmpty()) {
-                    Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+
+                if (showPostAnnouncement) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = { Text("Title") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    TextField(
+                        value = content,
+                        onValueChange = { content = it },
+                        label = { Text("Content") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Button(onClick = {
+                        val newAnnouncement = Announcement(title = title, content = content, timestamp = System.currentTimeMillis())
+                        db.collection("components").document(componentId).collection("announcements").add(newAnnouncement)
+                            .addOnSuccessListener {
+                                title = ""
+                                content = ""
+                                showPostAnnouncement = false
+                            }
+                            .addOnFailureListener { e ->
+                                errorMessage = "Error posting announcement: $e"
+                            }
+                    }) {
+                        Text("Post")
+                    }
+                    if (errorMessage.isNotEmpty()) {
+                        Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // 添加学生成绩按钮
-        Button(onClick = {
-            navController.navigate("student_scores/$componentId")
-        }) {
-            Text("Add Student Scores")
-        }
+            // 显示技能列表
+            Text("Skills", style = MaterialTheme.typography.h6)
+            Spacer(modifier = Modifier.height(8.dp))
+            skills.forEach { skill ->
+                SkillItem(skill)
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // 查看考试成绩按钮
-        Button(onClick = {
-            navController.navigate("exam_list/$componentId")
-        }) {
-            Text("View Exam Scores")
+            // 添加学生成绩按钮
+            Button(onClick = {
+                navController.navigate("student_scores/$componentId")
+            }) {
+                Text("Add Student Scores")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 查看考试成绩按钮
+            Button(onClick = {
+                navController.navigate("exam_list/$componentId")
+            }) {
+                Text("View Exam Scores")
+            }
         }
     }
 }
@@ -155,6 +171,22 @@ fun AnnouncementItem(announcement: Announcement) {
     }
 }
 
+@Composable
+fun SkillItem(skill: Skill) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = 4.dp
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(skill.title, style = MaterialTheme.typography.body1)
+            Text(skill.description, style = MaterialTheme.typography.body2)
+            Text(skill.link, style = MaterialTheme.typography.body2, color = Color.Blue)
+        }
+    }
+}
+
 fun loadAnnouncements(
     db: FirebaseFirestore,
     componentId: String,
@@ -162,12 +194,30 @@ fun loadAnnouncements(
     onSuccess: (List<Announcement>) -> Unit,
     onFailure: (Exception) -> Unit
 ) {
-    db.collection("components").document(componentId).collection("announcements").orderBy("timestamp").limit(limit).get()
+    db.collection("components").document(componentId).collection("announcements").orderBy("timestamp", Query.Direction.DESCENDING).limit(limit).get()
         .addOnSuccessListener { result ->
             val announcements = result.documents.mapNotNull { document ->
                 document.toObject(Announcement::class.java)?.copy(id = document.id)
             }
             onSuccess(announcements)
+        }
+        .addOnFailureListener { e ->
+            onFailure(e)
+        }
+}
+
+fun loadSkills(
+    db: FirebaseFirestore,
+    componentId: String,
+    onSuccess: (List<Skill>) -> Unit,
+    onFailure: (Exception) -> Unit
+) {
+    db.collection("components").document(componentId).collection("skills").get()
+        .addOnSuccessListener { result ->
+            val skills = result.documents.mapNotNull { document ->
+                document.toObject(Skill::class.java)?.copy(id = document.id)
+            }
+            onSuccess(skills)
         }
         .addOnFailureListener { e ->
             onFailure(e)
