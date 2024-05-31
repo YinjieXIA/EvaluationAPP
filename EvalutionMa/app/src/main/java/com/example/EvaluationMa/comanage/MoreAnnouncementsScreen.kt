@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 @Composable
 fun MoreAnnouncementsScreen(navController: NavController, componentId: String) {
@@ -82,7 +83,7 @@ fun loadMoreAnnouncements(
     onFailure: (Exception) -> Unit
 ) {
     var query = db.collection("components").document(componentId).collection("announcements")
-        .orderBy("timestamp")
+        .orderBy("timestamp", Query.Direction.DESCENDING)
         .limit(pageSize.toLong())
 
     if (lastVisible != null) {
