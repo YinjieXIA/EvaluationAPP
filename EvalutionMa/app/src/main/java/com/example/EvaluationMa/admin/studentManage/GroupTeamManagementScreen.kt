@@ -82,7 +82,9 @@ fun GroupTeamManagementScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             if (groups.isNotEmpty()) {
-                LazyColumn {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     items(groups) { group ->
                         var showTeams by remember { mutableStateOf(false) }
                         Column {

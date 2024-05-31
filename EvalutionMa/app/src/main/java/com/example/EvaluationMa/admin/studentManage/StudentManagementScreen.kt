@@ -4,6 +4,8 @@ import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +43,9 @@ fun StudentManagementScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         if (students.isNotEmpty()) {
-            LazyColumn {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
                 items(students) { student ->
                     StudentItem(student, onEdit = { studentId ->
                         navController.navigate("student_detail/$studentId")
@@ -55,10 +59,6 @@ fun StudentManagementScreen(navController: NavController) {
         if (errorMessage.isNotEmpty()) {
             Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
         }
-
-//        Button(onClick = { navController.navigate("add_student") }) {
-//            Text("Add Student")
-//        }
     }
 }
 
