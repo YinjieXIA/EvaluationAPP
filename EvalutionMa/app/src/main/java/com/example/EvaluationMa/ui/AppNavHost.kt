@@ -33,6 +33,7 @@ import com.example.EvaluationMa.comanage.ComponentDetailScreen
 import com.example.EvaluationMa.comanage.ExamListScreen
 import com.example.EvaluationMa.comanage.StudentEvaluationScreen
 import com.example.EvaluationMa.comanage.StudentScoresScreen
+import com.example.EvaluationMa.profile.ChangePasswordScreen
 import com.example.EvaluationMa.profile.ProfileScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -72,6 +73,7 @@ fun AppNavHost() {
 //        }
         composable("verify_users") { UserVerificationScreen(navController) }
         composable("profile") { ProfileScreen(navController) }
+        composable("change_password") { ChangePasswordScreen(navController = navController) }
         composable("module_manage") { ModuleManageScreen(navController) }
         composable("manage_components") { ComponentManagementScreen(navController) }
         composable(

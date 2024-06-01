@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
@@ -119,6 +120,7 @@ fun GroupTeamManagementScreen(navController: NavController) {
                                         }
                                         .addOnFailureListener { e ->
                                             errorMessage = "Error removing client: $e"
+                                            errorMessage = "Error removing client: $e"
                                         }
                                 },
                                 onAssignComponent = { groupId ->
@@ -168,6 +170,11 @@ fun GroupTeamManagementScreen(navController: NavController) {
                                                 students = students.toMutableMap().apply {
                                                     this[teamId] = this[teamId]!!.filterNot { it["uid"] == studentId }
                                                 }
+                                                // 更新用户的 group 和 team 字段为空
+                                                db.collection("users").document(studentId).update(mapOf(
+                                                    "group" to FieldValue.delete(),
+                                                    "team" to FieldValue.delete()
+                                                ))
                                             }
                                             .addOnFailureListener { e ->
                                                 errorMessage = "Error deleting student: $e"

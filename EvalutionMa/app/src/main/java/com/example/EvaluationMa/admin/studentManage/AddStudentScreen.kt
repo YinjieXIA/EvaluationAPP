@@ -102,7 +102,10 @@ fun AddStudentScreen(navController: NavController, groupId: String, teamId: Stri
             selectedStudentIds.forEach { studentId ->
                 db.collection("groups").document(groupId).collection("teams").document(teamId).collection("students").document(studentId).set(mapOf("uid" to studentId))
                     .addOnSuccessListener {
-                        db.collection("users").document(studentId).update(mapOf("group" to groupId, "team" to teamId))
+                        db.collection("users").document(studentId).update(mapOf(
+                            "group" to groupId,
+                            "team" to teamId
+                        ))
                             .addOnFailureListener { e ->
                                 errorMessage = "Error updating student: $e"
                             }

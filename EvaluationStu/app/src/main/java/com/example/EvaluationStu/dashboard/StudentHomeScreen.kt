@@ -55,39 +55,18 @@ fun StudentHomeScreen(navController: NavController) {
                 .addOnSuccessListener { document ->
                     studentName = document.getString("firstName") ?: "Student"
                     lastName = document.getString("lastName") ?: ""
-                    val studentTeamId = document.getString("team") ?: ""
-                    Log.d("StudentHomeScreen", "Student team ID: $studentTeamId")
-                    if (studentTeamId.isNotEmpty()) {
-                        // 通过teamID反向查找groupID
-                        db.collectionGroup("teams").whereEqualTo(FieldPath.documentId(), studentTeamId).get()
-                            .addOnSuccessListener { teamDocs ->
-                                val teamDoc = teamDocs.documents.firstOrNull()
-                                if (teamDoc != null) {
-                                    val studentGroupId = teamDoc.getString("group") ?: ""
-                                    Log.d("StudentHomeScreen", "Student group ID: $studentGroupId")
-                                    if (studentGroupId.isNotEmpty()) {
-                                        fetchAnnouncements(db, studentGroupId) { result ->
-                                            announcements = result
-                                        }
-                                        fetchComponents(db, studentGroupId) { result ->
-                                            components = result
-                                        }
-                                    } else {
-                                        Log.e("StudentHomeScreen", "Group ID not found in team document")
-                                        errorMessage = "You have not been assigned a group. Please contact a module manager."
-                                    }
-                                } else {
-                                    Log.e("StudentHomeScreen", "Team document not found")
-                                    errorMessage = "You have not been assigned a team. Please contact a module manager."
-                                }
-                            }
-                            .addOnFailureListener { exception ->
-                                Log.e("StudentHomeScreen", "Failed to fetch team document", exception)
-                                errorMessage = "You have not been assigned a team. Please contact a module manager."
-                            }
+                    val studentGroupId = document.getString("group") ?: ""
+                    Log.d("StudentHomeScreen", "Student group ID: $studentGroupId")
+                    if (studentGroupId.isNotEmpty()) {
+                        fetchAnnouncements(db, studentGroupId) { result ->
+                            announcements = result
+                        }
+                        fetchComponents(db, studentGroupId) { result ->
+                            components = result
+                        }
                     } else {
-                        Log.e("StudentHomeScreen", "Student team not assigned")
-                        errorMessage = "You have not been assigned a team. Please contact a module manager."
+                        Log.e("StudentHomeScreen", "Group ID not found in user document")
+                        errorMessage = "You have not been assigned a group. Please contact a module manager."
                     }
                 }
                 .addOnFailureListener { exception ->

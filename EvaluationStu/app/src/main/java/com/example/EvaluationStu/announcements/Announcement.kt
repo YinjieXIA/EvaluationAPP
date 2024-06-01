@@ -24,27 +24,30 @@ fun AnnouncementsScreen(navController: NavController) {
     val db = FirebaseFirestore.getInstance()
     val currentUser = auth.currentUser
     var announcements by remember { mutableStateOf<List<Announcement>>(emptyList()) }
-    var userComponents by remember { mutableStateOf<List<String>>(emptyList()) }
+    var studentGroup by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         currentUser?.let { user ->
             db.collection("users").document(user.uid).get()
                 .addOnSuccessListener { document ->
-                    userComponents = document.get("components") as? List<String> ?: emptyList()
-                    db.collection("announcements").get()
-                        .addOnSuccessListener { result ->
-                            announcements = result.documents.mapNotNull { document ->
-                                document.toObject(Announcement::class.java)?.copy(id = document.id)
-                            }.filter { announcement ->
-                                announcement.componentId == null || announcement.componentId in userComponents
+                    studentGroup = document.getString("group")
+                    studentGroup?.let { groupId ->
+                        db.collection("announcements").get()
+                            .addOnSuccessListener { result ->
+                                announcements = result.documents.mapNotNull { document ->
+                                    document.toObject(Announcement::class.java)?.copy(id = document.id)
+                                }.filter { announcement ->
+                                    announcement.componentId == null || announcement.componentId == groupId
+                                }
                             }
-                        }
-                        .addOnFailureListener { e ->
-                            // 处理错误
-                        }
+                            .addOnFailureListener { e ->
+                                errorMessage = "Error fetching announcements: ${e.message}"
+                            }
+                    }
                 }
                 .addOnFailureListener { e ->
-                    // 处理错误
+                    errorMessage = "Error fetching user data: ${e.message}"
                 }
         }
     }
@@ -56,37 +59,45 @@ fun AnnouncementsScreen(navController: NavController) {
             )
         },
         content = {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                items(announcements) { announcement ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .clickable { navController.navigate("announcement_detail/${announcement.id}") },
-                        elevation = 4.dp
-                    ) {
-                        Row(
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage ?: "Unknown error",
+                    color = MaterialTheme.colors.error,
+                    modifier = Modifier.padding(16.dp)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    items(announcements) { announcement ->
+                        Card(
                             modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable { navController.navigate("announcement_detail/${announcement.id}") },
+                            elevation = 4.dp
                         ) {
-                            Column {
-                                Text(
-                                    text = announcement.title,
-                                    style = MaterialTheme.typography.h6
-                                )
-                                Text(
-                                    text = "Published on: ${announcement.timestamp}",
-                                    style = MaterialTheme.typography.body2
-                                )
+                            Row(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = announcement.title,
+                                        style = MaterialTheme.typography.h6
+                                    )
+                                    Text(
+                                        text = "Published on: ${announcement.timestamp}",
+                                        style = MaterialTheme.typography.body2
+                                    )
+                                }
+                                Icon(Icons.Default.ArrowForward, contentDescription = "Details")
                             }
-                            Icon(Icons.Default.ArrowForward, contentDescription = "Details")
                         }
                     }
                 }

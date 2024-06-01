@@ -168,7 +168,10 @@ fun StudentDetailScreen(navController: NavController, studentId: String) {
                 Button(onClick = {
                     if (selectedGroup != null && selectedTeam != null) {
                         db.collection("users").document(studentId)
-                            .update(mapOf("group" to selectedGroup, "team" to selectedTeam))
+                            .update(mapOf(
+                                "group" to selectedGroup,
+                                "team" to selectedTeam
+                            ))
                             .addOnSuccessListener {
                                 student = student!!.toMutableMap().apply {
                                     put("group", selectedGroup!!)

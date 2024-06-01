@@ -5,6 +5,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,12 +31,13 @@ fun ProfileScreen(navController: NavController) {
     var lastName by remember { mutableStateOf("") }
     var photoUrl by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    var successMessage by remember { mutableStateOf("") }
     var userRole by remember { mutableStateOf("") }
     var isEditable by remember { mutableStateOf(false) }
 
     val currentUser = auth.currentUser
 
-    LaunchedEffect(currentUser) {
+    fun fetchUserProfile() {
         currentUser?.let { user ->
             db.collection("users").document(user.uid).get()
                 .addOnSuccessListener { document ->
@@ -50,6 +53,10 @@ fun ProfileScreen(navController: NavController) {
         }
     }
 
+    LaunchedEffect(currentUser) {
+        fetchUserProfile()
+    }
+
     fun saveProfile() {
         val userMap = mapOf(
             "firstName" to firstName,
@@ -58,7 +65,8 @@ fun ProfileScreen(navController: NavController) {
         )
         db.collection("users").document(currentUser!!.uid).update(userMap)
             .addOnSuccessListener {
-                errorMessage = "Profile updated successfully"
+                successMessage = "Profile updated successfully"
+                fetchUserProfile()
             }
             .addOnFailureListener { e ->
                 errorMessage = "Error updating profile: $e"
@@ -89,73 +97,86 @@ fun ProfileScreen(navController: NavController) {
         }
     }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Profile", style = MaterialTheme.typography.h5)
-        Spacer(modifier = Modifier.height(16.dp))
+        item {
+            Text("Profile", style = MaterialTheme.typography.h5)
+            Spacer(modifier = Modifier.height(16.dp))
 
-        TextField(
-            value = firstName,
-            onValueChange = { firstName = it },
-            label = { Text("First Name") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = isEditable
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            label = { Text("Last Name") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = isEditable
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(onClick = { imagePickerLauncher.launch("image/*") }) {
-                Text("Select Image")
-            }
-            Spacer(modifier = Modifier.width(16.dp))
             TextField(
-                value = photoUrl,
-                onValueChange = { photoUrl = it },
-                label = { Text("Photo URL") },
-                modifier = Modifier.weight(1f),
+                value = firstName,
+                onValueChange = { firstName = it },
+                label = { Text("First Name") },
+                modifier = Modifier.fillMaxWidth(),
                 enabled = isEditable
             )
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Image(
-            painter = rememberAsyncImagePainter(
-                model = photoUrl,
-                error = painterResource(R.drawable.ic_broken_image)
-            ),
-            contentDescription = "Profile Photo",
-            modifier = Modifier.size(128.dp)
-        )
+            TextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                label = { Text("Last Name") },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = isEditable
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { saveProfile() }) {
-            Text("Save")
-        }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(onClick = { imagePickerLauncher.launch("image/*") }) {
+                    Text("Select Image")
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                TextField(
+                    value = photoUrl,
+                    onValueChange = { photoUrl = it },
+                    label = { Text("Photo URL") },
+                    modifier = Modifier.weight(1f),
+                    enabled = isEditable
+                )
+            }
 
-        if (errorMessage.isNotEmpty()) {
-            Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = photoUrl,
+                    error = painterResource(R.drawable.ic_broken_image)
+                ),
+                contentDescription = "Profile Photo",
+                modifier = Modifier.size(128.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { saveProfile() }) {
+                Text("Save")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 增加修改密码按钮
+            Button(onClick = { navController.navigate("change_password") }) {
+                Text("Change Password")
+            }
+
+            if (errorMessage.isNotEmpty()) {
+                Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+            }
+
+            if (successMessage.isNotEmpty()) {
+                Text(successMessage, color = Color.Green, modifier = Modifier.padding(top = 8.dp))
+            }
         }
     }
 }
