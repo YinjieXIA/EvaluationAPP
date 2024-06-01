@@ -13,10 +13,19 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.EvaluationStu.announcements.AnnouncementDetailScreen
+import com.example.EvaluationStu.announcements.AnnouncementsScreen
 import com.example.EvaluationStu.auth.LoginScreen
 import com.example.EvaluationStu.auth.RegisterScreen
 import com.example.EvaluationStu.auth.ForgotPasswordScreen
 import com.example.EvaluationStu.profile.StudentProfileScreen
+import com.example.EvaluationStu.dashboard.StudentHomeScreen
+import com.example.EvaluationStu.scores.ScoresScreen
+import com.example.EvaluationStu.scores.SkillDetailScreen
+import com.example.EvaluationStu.scores.ScoreHistoryScreen
+import com.example.EvaluationStu.scores.RequestReviewScreen
+import com.example.EvaluationStu.team.TeamMemberDetailScreen
+import com.example.EvaluationStu.team.TeamMemberScoresScreen
 
 @Composable
 fun AppNavHost() {
@@ -27,19 +36,29 @@ fun AppNavHost() {
         composable("forgot_password") { ForgotPasswordScreen(navController) }
         composable("student_home") { StudentHomeScreen(navController) } // 学生端主页
         composable("student_profile") { StudentProfileScreen(navController) }
-    }
-}
-
-@Composable
-fun StudentHomeScreen(navController: NavController) {
-    // 学生端主页实现
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Welcome to the Student Home Page!")
+        composable("scores") { ScoresScreen(navController) }
+        composable("score_detail/{componentName}/{skillName}") { backStackEntry ->
+            val componentName = backStackEntry.arguments?.getString("componentName") ?: ""
+            val skillName = backStackEntry.arguments?.getString("skillName") ?: ""
+            SkillDetailScreen(navController, componentName, skillName)
+        }
+        composable("score_history/{skillName}") { backStackEntry ->
+            val skillName = backStackEntry.arguments?.getString("skillName") ?: ""
+            ScoreHistoryScreen(navController, skillName)
+        }
+        composable("request_review/{skillName}") { backStackEntry ->
+            val skillName = backStackEntry.arguments?.getString("skillName") ?: ""
+            RequestReviewScreen(navController, skillName)
+        }
+        composable("announcements") { AnnouncementsScreen(navController) }
+        composable("announcement_detail/{announcementId}") { backStackEntry ->
+            val announcementId = backStackEntry.arguments?.getString("announcementId") ?: return@composable
+            AnnouncementDetailScreen(navController, announcementId)
+        }
+        composable("team_member_scores") { TeamMemberScoresScreen(navController) }
+        composable("team_member_detail/{memberId}") { backStackEntry ->
+            val memberId = backStackEntry.arguments?.getString("memberId") ?: ""
+            TeamMemberDetailScreen(navController, memberId)
+        }
     }
 }
