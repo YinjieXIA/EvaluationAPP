@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.EvaluationMa.admin.AnnouncementScreen
 import com.example.EvaluationMa.comanage.ComponentManagementScreen
 import com.example.EvaluationMa.admin.ModuleManageScreen
 import com.example.EvaluationMa.comanage.SkillManagementScreen
@@ -30,8 +31,6 @@ import com.example.EvaluationMa.admin.studentManage.AssignClientScreen
 import com.example.EvaluationMa.admin.studentManage.AssignComponentScreen
 import com.example.EvaluationMa.comanage.ComponentDetailScreen
 import com.example.EvaluationMa.comanage.ExamListScreen
-import com.example.EvaluationMa.comanage.ExamScoresScreen
-import com.example.EvaluationMa.comanage.MoreAnnouncementsScreen
 import com.example.EvaluationMa.comanage.StudentEvaluationScreen
 import com.example.EvaluationMa.comanage.StudentScoresScreen
 import com.example.EvaluationMa.profile.ProfileScreen
@@ -82,20 +81,13 @@ fun AppNavHost() {
             val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
             ComponentDetailScreen(navController, componentId)
         }
-        composable("student_scores/{componentId}") { backStackEntry ->
-            StudentScoresScreen(navController, backStackEntry.arguments?.getString("componentId") ?: "")
+        composable("student_scores/{componentId}?groupId={groupId}") { backStackEntry ->
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            val groupId = backStackEntry.arguments?.getString("groupId")
+            StudentScoresScreen(navController, componentId, groupId)
         }
         composable("exam_list/{componentId}") { backStackEntry ->
             ExamListScreen(navController, backStackEntry.arguments?.getString("componentId") ?: "")
-        }
-        composable("exam_scores/{componentId}/{examName}") { backStackEntry ->
-            ExamScoresScreen(navController, backStackEntry.arguments?.getString("componentId") ?: "", backStackEntry.arguments?.getString("examName") ?: "")
-        }
-        composable("component_detail_more_announcements/{componentId}") { backStackEntry ->
-            val componentId = backStackEntry.arguments?.getString("componentId")
-            if (componentId != null) {
-                MoreAnnouncementsScreen(navController, componentId)
-            }
         }
         composable("student_evaluation/{componentId}/{examName}/{studentId}") { backStackEntry ->
             val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
@@ -172,6 +164,11 @@ fun AppNavHost() {
             val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
             AssignComponentScreen(navController, groupId)
         }
+        composable(route = "announcement_screen") {
+            AnnouncementScreen(navController)
+        }
+
+
         // 添加其他
     }
 }

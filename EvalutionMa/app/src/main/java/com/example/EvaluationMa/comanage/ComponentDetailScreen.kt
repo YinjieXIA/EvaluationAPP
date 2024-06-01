@@ -72,61 +72,6 @@ fun ComponentDetailScreen(navController: NavController, componentId: String) {
             Text("Component Details", style = MaterialTheme.typography.h5)
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 公告模块
-            Text("Announcements", style = MaterialTheme.typography.h6)
-            Spacer(modifier = Modifier.height(8.dp))
-            announcements.firstOrNull()?.let { announcement ->
-                AnnouncementItem(announcement)
-            }
-            Button(onClick = {
-                navController.navigate("component_detail_more_announcements/$componentId")
-            }) {
-                Text("More")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 发布公告按钮 (仅限 component 管理员或总管理员)
-            if (role == "component_manager" || role == "module_manager") {
-                Button(onClick = { showPostAnnouncement = !showPostAnnouncement }) {
-                    Text(if (showPostAnnouncement) "Hide Announcement Form" else "Post Announcement")
-                }
-
-                if (showPostAnnouncement) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    TextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        label = { Text("Title") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    TextField(
-                        value = content,
-                        onValueChange = { content = it },
-                        label = { Text("Content") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Button(onClick = {
-                        val newAnnouncement = Announcement(title = title, content = content, timestamp = System.currentTimeMillis())
-                        db.collection("components").document(componentId).collection("announcements").add(newAnnouncement)
-                            .addOnSuccessListener {
-                                title = ""
-                                content = ""
-                                showPostAnnouncement = false
-                            }
-                            .addOnFailureListener { e ->
-                                errorMessage = "Error posting announcement: $e"
-                            }
-                    }) {
-                        Text("Post")
-                    }
-                    if (errorMessage.isNotEmpty()) {
-                        Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             // 显示技能列表
             Text("Skills", style = MaterialTheme.typography.h6)

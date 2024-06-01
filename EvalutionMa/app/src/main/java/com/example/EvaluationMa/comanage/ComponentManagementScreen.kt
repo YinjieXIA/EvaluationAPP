@@ -13,7 +13,7 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
 
-data class Component(val id: String = "", val name: String = "", val description: String = "", val comanegerId: String = "")
+data class Component(val id: String = "", val name: String = "", val description: String = "", val comanegerId: String = "", val weight: Double = 0.0)
 data class User(val uid: String = "", val email: String = "", val role: String = "", val verified: Boolean = false)
 
 @Composable
@@ -23,6 +23,7 @@ fun ComponentManagementScreen(navController: NavController) {
     var comanegers by remember { mutableStateOf<List<User>>(emptyList()) }
     var componentName by remember { mutableStateOf("") }
     var componentDescription by remember { mutableStateOf("") }
+    var componentWeight by remember { mutableStateOf("") }
     var selectedComponent by remember { mutableStateOf<Component?>(null) }
     var selectedComaneger by remember { mutableStateOf<User?>(null) }
     var errorMessage by remember { mutableStateOf("") }
@@ -38,7 +39,7 @@ fun ComponentManagementScreen(navController: NavController) {
                 errorMessage = "Error fetching components: $e"
                 Log.e("ComponentManagementScreen", errorMessage)
             }
-        // 获取教师列表
+        // 获取组件管理员列表
         db.collection("users").whereEqualTo("role", "component_manager").whereEqualTo("verified", true).get()
             .addOnSuccessListener { result ->
                 comanegers = result.documents.mapNotNull { document ->
@@ -71,8 +72,14 @@ fun ComponentManagementScreen(navController: NavController) {
             label = { Text("Component Description") },
             modifier = Modifier.fillMaxWidth()
         )
+        TextField(
+            value = componentWeight,
+            onValueChange = { componentWeight = it },
+            label = { Text("Component Weight") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-        // 教师选择
+        // 管理员选择
         var expanded by remember { mutableStateOf(false) }
         Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
             Text(selectedComaneger?.email ?: "Select a Component Manager", modifier = Modifier.fillMaxWidth().clickable { expanded = true })
@@ -88,16 +95,17 @@ fun ComponentManagementScreen(navController: NavController) {
             }
         }
 
-
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
-                val newComponent = Component(name = componentName, description = componentDescription, comanegerId = selectedComaneger?.uid ?: "")
+                val weight = componentWeight.toDoubleOrNull() ?: 0.0
+                val newComponent = Component(name = componentName, description = componentDescription, comanegerId = selectedComaneger?.uid ?: "", weight = weight)
                 db.collection("components").add(newComponent)
                     .addOnSuccessListener { documentReference ->
                         newComponent.copy(id = documentReference.id)
                         components = components + newComponent
                         componentName = ""
                         componentDescription = ""
+                        componentWeight = ""
                         selectedComaneger = null
                     }
                     .addOnFailureListener { e ->
@@ -109,10 +117,12 @@ fun ComponentManagementScreen(navController: NavController) {
             }
             Button(onClick = {
                 selectedComponent?.let { component ->
+                    val weight = componentWeight.toDoubleOrNull() ?: component.weight
                     val updatedComponent = component.copy(
                         name = componentName,
                         description = componentDescription,
-                        comanegerId = selectedComaneger?.uid ?: component.comanegerId
+                        comanegerId = selectedComaneger?.uid ?: component.comanegerId,
+                        weight = weight
                     )
                     db.collection("components").document(component.id).set(updatedComponent)
                         .addOnSuccessListener {
@@ -121,6 +131,7 @@ fun ComponentManagementScreen(navController: NavController) {
                             }
                             componentName = ""
                             componentDescription = ""
+                            componentWeight = ""
                             selectedComponent = null
                             selectedComaneger = null
                         }
@@ -140,6 +151,7 @@ fun ComponentManagementScreen(navController: NavController) {
                     selectedComponent = it
                     componentName = it.name
                     componentDescription = it.description
+                    componentWeight = it.weight.toString()
                     selectedComaneger = comanegers.find { comaneger -> comaneger.uid == it.comanegerId }
                 }, onDelete = {
                     db.collection("components").document(component.id).delete()
@@ -175,6 +187,7 @@ fun ComponentItem(component: Component, onEdit: (Component) -> Unit, onDelete: (
         Column(modifier = Modifier.padding(16.dp)) {
             Text(component.name, style = MaterialTheme.typography.body1)
             Text(component.description, style = MaterialTheme.typography.body2)
+            Text("Component Weight: ${component.weight}", style = MaterialTheme.typography.body2)
             Text("Component Manager ID: ${component.comanegerId}", style = MaterialTheme.typography.body2)
             Row(
                 modifier = Modifier.fillMaxWidth(),

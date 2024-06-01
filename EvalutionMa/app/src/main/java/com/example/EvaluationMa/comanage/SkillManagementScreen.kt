@@ -12,7 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 
-data class Skill(val id: String = "", val title: String = "", val description: String = "", val link: String = "")
+data class Skill(val id: String = "", val title: String = "", val description: String = "", val link: String = "", val weight: Double = 0.0)
 
 @Composable
 fun SkillManagementScreen(navController: NavController, componentId: String) {
@@ -21,6 +21,7 @@ fun SkillManagementScreen(navController: NavController, componentId: String) {
     var skillTitle by remember { mutableStateOf("") }
     var skillDescription by remember { mutableStateOf("") }
     var skillLink by remember { mutableStateOf("") }
+    var skillWeight by remember { mutableStateOf("") }
     var selectedSkill by remember { mutableStateOf<Skill?>(null) }
     var errorMessage by remember { mutableStateOf("") }
 
@@ -63,10 +64,17 @@ fun SkillManagementScreen(navController: NavController, componentId: String) {
             label = { Text("Skill Link") },
             modifier = Modifier.fillMaxWidth()
         )
+        TextField(
+            value = skillWeight,
+            onValueChange = { skillWeight = it },
+            label = { Text("Skill Weight") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
-                val newSkill = Skill(title = skillTitle, description = skillDescription, link = skillLink)
+                val weight = skillWeight.toDoubleOrNull() ?: 0.0
+                val newSkill = Skill(title = skillTitle, description = skillDescription, link = skillLink, weight = weight)
                 db.collection("components").document(componentId).collection("skills").add(newSkill)
                     .addOnSuccessListener { documentReference ->
                         newSkill.copy(id = documentReference.id)
@@ -74,6 +82,7 @@ fun SkillManagementScreen(navController: NavController, componentId: String) {
                         skillTitle = ""
                         skillDescription = ""
                         skillLink = ""
+                        skillWeight = ""
                     }
                     .addOnFailureListener { e ->
                         errorMessage = "Error adding skill: $e"
@@ -84,7 +93,8 @@ fun SkillManagementScreen(navController: NavController, componentId: String) {
             }
             Button(onClick = {
                 selectedSkill?.let { skill ->
-                    val updatedSkill = skill.copy(title = skillTitle, description = skillDescription, link = skillLink)
+                    val weight = skillWeight.toDoubleOrNull() ?: skill.weight
+                    val updatedSkill = skill.copy(title = skillTitle, description = skillDescription, link = skillLink, weight = weight)
                     db.collection("components").document(componentId).collection("skills").document(skill.id).set(updatedSkill)
                         .addOnSuccessListener {
                             skills = skills.map {
@@ -93,6 +103,7 @@ fun SkillManagementScreen(navController: NavController, componentId: String) {
                             skillTitle = ""
                             skillDescription = ""
                             skillLink = ""
+                            skillWeight = ""
                             selectedSkill = null
                         }
                         .addOnFailureListener { e ->
@@ -112,6 +123,7 @@ fun SkillManagementScreen(navController: NavController, componentId: String) {
                     skillTitle = it.title
                     skillDescription = it.description
                     skillLink = it.link
+                    skillWeight = it.weight.toString()
                 }, onDelete = {
                     db.collection("components").document(componentId).collection("skills").document(skill.id).delete()
                         .addOnSuccessListener {
@@ -143,6 +155,7 @@ fun SkillItem(skill: Skill, onEdit: (Skill) -> Unit, onDelete: () -> Unit) {
             Text(skill.title, style = MaterialTheme.typography.body1)
             Text(skill.description, style = MaterialTheme.typography.body2)
             Text(skill.link, style = MaterialTheme.typography.body2)
+            Text("Skill Weight: ${skill.weight}", style = MaterialTheme.typography.body2)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
