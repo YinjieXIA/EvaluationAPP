@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -32,24 +33,29 @@ fun StudentProfileScreen(navController: NavController) {
     var photoUrl by remember { mutableStateOf("") }
     var studentNumber by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    var successMessage by remember { mutableStateOf("") }
     var isEditable by remember { mutableStateOf(false) }
 
     val currentUser = auth.currentUser
 
-    LaunchedEffect(currentUser) {
+    fun fetchUserProfile() {
         currentUser?.let { user ->
             db.collection("users").document(user.uid).get()
                 .addOnSuccessListener { document ->
                     firstName = document.getString("firstName") ?: ""
                     lastName = document.getString("lastName") ?: ""
                     photoUrl = document.getString("photoUrl") ?: ""
-                    studentNumber = document.getString("studentNumber") ?: ""
+                    studentNumber = document.getLong("studentId")?.toString() ?: ""
                     isEditable = true
                 }
                 .addOnFailureListener { e ->
                     errorMessage = "Error fetching user data: $e"
                 }
         }
+    }
+
+    LaunchedEffect(currentUser) {
+        fetchUserProfile()
     }
 
     fun saveProfile() {
@@ -60,14 +66,14 @@ fun StudentProfileScreen(navController: NavController) {
         )
         db.collection("users").document(currentUser!!.uid).update(userMap)
             .addOnSuccessListener {
-                errorMessage = "Profile updated successfully"
+                successMessage = "Profile updated successfully"
+                fetchUserProfile()
             }
             .addOnFailureListener { e ->
                 errorMessage = "Error updating profile: $e"
             }
     }
 
-    // 函数定义用来上传图片到 Firebase Storage
     fun uploadImageToFirebaseStorage(uri: Uri, onSuccess: (String) -> Unit) {
         val storageRef = storage.reference
         val fileRef = storageRef.child("profile_images/${currentUser!!.uid}.png")
@@ -92,84 +98,96 @@ fun StudentProfileScreen(navController: NavController) {
         }
     }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Profile", style = MaterialTheme.typography.h5)
-        Spacer(modifier = Modifier.height(16.dp))
+        item {
+            Text("Profile", style = MaterialTheme.typography.h5)
+            Spacer(modifier = Modifier.height(16.dp))
 
-        TextField(
-            value = studentNumber,
-            onValueChange = { },
-            label = { Text("Student Number") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = false,
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextField(
-            value = firstName,
-            onValueChange = { firstName = it },
-            label = { Text("First Name") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = isEditable
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            label = { Text("Last Name") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = isEditable
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(onClick = { imagePickerLauncher.launch("image/*") }) {
-                Text("Select Image")
-            }
-            Spacer(modifier = Modifier.width(16.dp))
             TextField(
-                value = photoUrl,
-                onValueChange = { photoUrl = it },
-                label = { Text("Photo URL") },
-                modifier = Modifier.weight(1f),
+                value = studentNumber,
+                onValueChange = { },
+                label = { Text("Student Number") },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = false,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextField(
+                value = firstName,
+                onValueChange = { firstName = it },
+                label = { Text("First Name") },
+                modifier = Modifier.fillMaxWidth(),
                 enabled = isEditable
             )
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Image(
-            painter = rememberAsyncImagePainter(
-                model = photoUrl,
-                error = painterResource(R.drawable.ic_broken_image)
-            ),
-            contentDescription = "Profile Photo",
-            modifier = Modifier.size(128.dp)
-        )
+            TextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                label = { Text("Last Name") },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = isEditable
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { saveProfile() }) {
-            Text("Save")
-        }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(onClick = { imagePickerLauncher.launch("image/*") }) {
+                    Text("Select Image")
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                TextField(
+                    value = photoUrl,
+                    onValueChange = { photoUrl = it },
+                    label = { Text("Photo URL") },
+                    modifier = Modifier.weight(1f),
+                    enabled = isEditable
+                )
+            }
 
-        if (errorMessage.isNotEmpty()) {
-            Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = photoUrl,
+                    error = painterResource(R.drawable.ic_broken_image)
+                ),
+                contentDescription = "Profile Photo",
+                modifier = Modifier.size(128.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { saveProfile() }) {
+                Text("Save")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { navController.navigate("change_password") }) {
+                Text("Change Password")
+            }
+
+            if (errorMessage.isNotEmpty()) {
+                Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+            }
+
+            if (successMessage.isNotEmpty()) {
+                Text(successMessage, color = Color.Green, modifier = Modifier.padding(top = 8.dp))
+            }
         }
     }
 }

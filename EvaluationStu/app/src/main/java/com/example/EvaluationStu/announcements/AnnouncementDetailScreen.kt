@@ -20,9 +20,7 @@ fun AnnouncementDetailScreen(navController: NavController, announcementId: Strin
     val db = FirebaseFirestore.getInstance()
     var announcement by remember { mutableStateOf<Announcement?>(null) }
 
-    // 模拟数据加载
     LaunchedEffect(announcementId) {
-        // 获取公告详情
         db.collection("announcements").document(announcementId).get()
             .addOnSuccessListener { document ->
                 announcement = document.toObject(Announcement::class.java)
@@ -70,7 +68,7 @@ fun AnnouncementDetailScreen(navController: NavController, announcementId: Strin
                     }
                     item {
                         Text(
-                            text = "Component: ${ann.component}",
+                            text = "Component: ${ann.componentId}",
                             style = MaterialTheme.typography.body2,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )

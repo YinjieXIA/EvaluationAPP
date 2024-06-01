@@ -13,15 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.EvaluationStu.models.Announcement
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
-data class Announcement(
-    val id: String,
-    val title: String,
-    val content: String,
-    val timestamp: Long
-)
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -30,16 +24,29 @@ fun AnnouncementsScreen(navController: NavController) {
     val db = FirebaseFirestore.getInstance()
     val currentUser = auth.currentUser
     var announcements by remember { mutableStateOf<List<Announcement>>(emptyList()) }
+    var userComponents by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    // 模拟数据加载
     LaunchedEffect(Unit) {
-        // 获取公告列表
-        db.collection("announcements").get()
-            .addOnSuccessListener { result ->
-                announcements = result.documents.mapNotNull { document ->
-                    document.toObject(Announcement::class.java)?.copy(id = document.id)
-                } // TODO: 将此示例数据替换为实际数据
-            }
+        currentUser?.let { user ->
+            db.collection("users").document(user.uid).get()
+                .addOnSuccessListener { document ->
+                    userComponents = document.get("components") as? List<String> ?: emptyList()
+                    db.collection("announcements").get()
+                        .addOnSuccessListener { result ->
+                            announcements = result.documents.mapNotNull { document ->
+                                document.toObject(Announcement::class.java)?.copy(id = document.id)
+                            }.filter { announcement ->
+                                announcement.componentId == null || announcement.componentId in userComponents
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            // 处理错误
+                        }
+                }
+                .addOnFailureListener { e ->
+                    // 处理错误
+                }
+        }
     }
 
     Scaffold(
@@ -75,7 +82,7 @@ fun AnnouncementsScreen(navController: NavController) {
                                     style = MaterialTheme.typography.h6
                                 )
                                 Text(
-                                    text = "Published on: ${announcement.timestamp}", // 这里可以格式化日期
+                                    text = "Published on: ${announcement.timestamp}",
                                     style = MaterialTheme.typography.body2
                                 )
                             }

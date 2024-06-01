@@ -20,6 +20,7 @@ import com.example.EvaluationStu.auth.RegisterScreen
 import com.example.EvaluationStu.auth.ForgotPasswordScreen
 import com.example.EvaluationStu.profile.StudentProfileScreen
 import com.example.EvaluationStu.dashboard.StudentHomeScreen
+import com.example.EvaluationStu.profile.ChangePasswordScreen
 import com.example.EvaluationStu.scores.ScoresScreen
 import com.example.EvaluationStu.scores.SkillDetailScreen
 import com.example.EvaluationStu.scores.ScoreHistoryScreen
@@ -36,6 +37,9 @@ fun AppNavHost() {
         composable("forgot_password") { ForgotPasswordScreen(navController) }
         composable("student_home") { StudentHomeScreen(navController) } // 学生端主页
         composable("student_profile") { StudentProfileScreen(navController) }
+        composable("change_password") {
+            ChangePasswordScreen(navController = navController)
+        }
         composable("scores") { ScoresScreen(navController) }
         composable("score_detail/{componentName}/{skillName}") { backStackEntry ->
             val componentName = backStackEntry.arguments?.getString("componentName") ?: ""
