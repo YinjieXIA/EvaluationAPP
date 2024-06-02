@@ -12,11 +12,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.EvaluationStu.models.ComponentScore
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -26,28 +27,34 @@ fun ScoresScreen(navController: NavController) {
     val currentUser = auth.currentUser
     var studentName by remember { mutableStateOf("") }
     var components by remember { mutableStateOf<List<ComponentScore>>(emptyList()) }
+    val coroutineScope = rememberCoroutineScope()
 
-    // 模拟数据加载
+    // 数据加载
     LaunchedEffect(Unit) {
-        // 获取学生姓名
-        currentUser?.let {
-            db.collection("users").document(it.uid).get()
-                .addOnSuccessListener { document ->
-                    studentName = document.getString("firstName") ?: "Student" // TODO: 将此示例数据替换为实际数据
-                }
-        }
+        coroutineScope.launch {
+            // 获取学生姓名
+            currentUser?.let { user ->
+                val userDocument = db.collection("users").document(user.uid).get().await()
+                studentName = userDocument.getString("firstName") ?: "Student"
 
-        // 获取组件成绩
-        // TODO: 这里需要根据实际的Firestore数据库结构进行查询
-        components = listOf(
-            ComponentScore("Générales E-S", 11.71),
-            ComponentScore("Electronique", 13.80),
-            ComponentScore("Signal", 13.23),
-            ComponentScore("Générales I-T", 12.50),
-            ComponentScore("Informatique", 14.00),
-            ComponentScore("Télécommunications", 13.50),
-            ComponentScore("Intégration", 15.00)
-        ) // 示例数据
+                // 获取组件总成绩
+                val teamId = userDocument.getString("team") ?: ""
+                if (teamId.isNotEmpty()) {
+                    val groupDocument = db.collection("groups").document(userDocument.getString("group")!!).get().await()
+                    val totalScoresDocuments = db.collection("groups").document(groupDocument.id).collection("teams").document(teamId).collection("students").document(user.uid).collection("totalScores").get().await()
+
+                    val componentScores = mutableListOf<ComponentScore>()
+                    for (document in totalScoresDocuments.documents) {
+                        val componentId = document.getString("componentId") ?: continue
+                        val score = document.getDouble("totalScore") ?: continue
+                        val componentDoc = db.collection("components").document(componentId).get().await()
+                        val componentName = componentDoc.getString("name") ?: "Unknown Component"
+                        componentScores.add(ComponentScore(componentName, score, componentId))
+                    }
+                    components = componentScores
+                }
+            }
+        }
     }
 
     Scaffold(
@@ -76,7 +83,7 @@ fun ScoresScreen(navController: NavController) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
-                                .clickable { navController.navigate("score_detail/${component.name}") },
+                                .clickable { navController.navigate("score_detail/${component.id}") },
                             elevation = 4.dp
                         ) {
                             Row(

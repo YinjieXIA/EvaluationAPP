@@ -16,21 +16,63 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.EvaluationStu.models.ComponentScore
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun TeamMemberScoresScreen(navController: NavController) {
     val db = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
     var teamMembers by remember { mutableStateOf<List<TeamMemberScore>>(emptyList()) }
+    val coroutineScope = rememberCoroutineScope()
 
-    // 模拟数据加载
+    // 数据加载
     LaunchedEffect(Unit) {
-        // 获取团队成员成绩
-        db.collection("team_members").get()
-            .addOnSuccessListener { result ->
-                teamMembers = result.documents.map { it.toObject(TeamMemberScore::class.java) ?: TeamMemberScore() }
+        coroutineScope.launch {
+            currentUser?.let { user ->
+                // 获取用户的 groupId 和 teamId
+                val userDoc = db.collection("users").document(user.uid).get().await()
+                val groupId = userDoc.getString("group") ?: return@launch
+                val teamId = userDoc.getString("team") ?: return@launch
+
+                // 获取团队成员成绩
+                val teamMembersDocs = db.collection("groups").document(groupId)
+                    .collection("teams").document(teamId).collection("students").get().await()
+
+                val members = teamMembersDocs.documents.mapNotNull { document ->
+                    val memberId = document.id
+
+                    // 获取团队成员的用户文档，获取电子邮件和名称
+                    val memberUserDoc = db.collection("users").document(memberId).get().await()
+                    val email = memberUserDoc.getString("email") ?: ""
+                    val firstName = memberUserDoc.getString("firstName") ?: ""
+                    val lastName = memberUserDoc.getString("lastName") ?: ""
+                    val name = "$firstName $lastName"
+
+                    // 获取每个成员的所有组件的分数
+                    val totalScoresDocuments = db.collection("groups").document(groupId)
+                        .collection("teams").document(teamId).collection("students")
+                        .document(memberId).collection("totalScores").get().await()
+
+                    val componentScores = totalScoresDocuments.documents.mapNotNull { scoreDoc ->
+                        val componentId = scoreDoc.getString("componentId") ?: return@mapNotNull null
+                        val score = scoreDoc.getDouble("totalScore") ?: return@mapNotNull null
+                        val componentDoc = db.collection("components").document(componentId).get().await()
+                        val componentName = componentDoc.getString("name") ?: "Unknown Component"
+                        ComponentScore(componentName, score, componentId)
+                    }
+
+                    TeamMemberScore(memberId, name, email, componentScores)
+                }
+
+                teamMembers = members
             }
+        }
     }
 
     Scaffold(
@@ -50,9 +92,6 @@ fun TeamMemberScoresScreen(navController: NavController) {
                     style = MaterialTheme.typography.h5,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-
-                // 排序和筛选控件
-                // TODO: 添加排序和筛选功能
 
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
@@ -76,34 +115,31 @@ fun TeamMemberCard(navController: NavController, member: TeamMemberScore) {
             .clickable { navController.navigate("team_member_detail/${member.id}") },
         elevation = 4.dp
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
         ) {
-            Column {
-                Text(
-                    text = member.name,
-                    style = MaterialTheme.typography.h6
-                )
-                Text(
-                    text = "Email: ${member.email}",
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.clickable {
-                        val intent = Intent(Intent.ACTION_SENDTO).apply {
-                            data = Uri.parse("mailto:${member.email}")
-                        }
-                        context.startActivity(intent)
+            Text(
+                text = member.name,
+                style = MaterialTheme.typography.h6
+            )
+            Text(
+                text = "Email: ${member.email}",
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.clickable {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:${member.email}")
                     }
-                )
+                    context.startActivity(intent)
+                }
+            )
+            member.scores.forEach { componentScore ->
                 Text(
-                    text = "Score: ${member.score}",
+                    text = "Component: ${componentScore.name}, Score: ${componentScore.score}",
                     style = MaterialTheme.typography.body1
                 )
             }
-            Icon(Icons.Default.ArrowForward, contentDescription = "Details")
         }
     }
 }
@@ -112,5 +148,5 @@ data class TeamMemberScore(
     val id: String = "",
     val name: String = "",
     val email: String = "",
-    val score: Double = 0.0
+    val scores: List<ComponentScore> = emptyList()
 )

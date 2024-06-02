@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.EvaluationStu.models.Announcement
 import com.google.firebase.firestore.FieldPath
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun StudentHomeScreen(navController: NavController) {
@@ -27,9 +28,9 @@ fun StudentHomeScreen(navController: NavController) {
     val currentUser = auth.currentUser
     var studentName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    var performanceSummary by remember { mutableStateOf("") }
+    var performanceSummary by remember { mutableStateOf("Loading...") }
     var announcements by remember { mutableStateOf<List<Announcement>>(emptyList()) }
-    var components by remember { mutableStateOf<List<Pair<String, Double>>>(emptyList()) }
+    var components by remember { mutableStateOf<List<Triple<String, String, Double>>>(emptyList()) }
     var errorMessage by remember { mutableStateOf("") }
     var moduleManagerName by remember { mutableStateOf("") }
     var moduleManagerEmail by remember { mutableStateOf("") }
@@ -63,6 +64,9 @@ fun StudentHomeScreen(navController: NavController) {
                         }
                         fetchComponents(db, studentGroupId) { result ->
                             components = result
+                            fetchPerformanceSummary(db, user.uid, result) { summary ->
+                                performanceSummary = summary
+                            }
                         }
                     } else {
                         Log.e("StudentHomeScreen", "Group ID not found in user document")
@@ -74,9 +78,6 @@ fun StudentHomeScreen(navController: NavController) {
                     errorMessage = "Unable to fetch user information. Please contact a module manager."
                 }
         }
-
-        // 获取学期成绩概览
-        performanceSummary = "Semester average score: 15.2 / 20" // 示例数据
     }
 
     LazyColumn(
@@ -110,12 +111,12 @@ fun StudentHomeScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { navController.navigate("grades") },
+                onClick = { navController.navigate("scores") },
                 modifier = Modifier.fillMaxWidth().padding(8.dp)
             ) {
                 Icon(Icons.Default.Grade, contentDescription = "View Grades", tint = Color.White)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("View Grades")
+                Text("View Scores")
             }
 
             Button(
@@ -125,6 +126,15 @@ fun StudentHomeScreen(navController: NavController) {
                 Icon(Icons.Default.Announcement, contentDescription = "View Announcements", tint = Color.White)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("View Announcements")
+            }
+
+            Button(
+                onClick = { navController.navigate("team_member_scores") },
+                modifier = Modifier.fillMaxWidth().padding(8.dp)
+            ) {
+                Icon(Icons.Default.Group, contentDescription = "Team", tint = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Team")
             }
 
             Button(
@@ -179,7 +189,7 @@ fun StudentHomeScreen(navController: NavController) {
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(text = "Components and Weights", style = MaterialTheme.typography.h6)
-                        components.forEach { (component, weight) ->
+                        components.forEach { (id, component, weight) ->
                             Text(text = "$component: $weight", style = MaterialTheme.typography.body1)
                         }
                     }
@@ -228,7 +238,7 @@ fun fetchAnnouncements(db: FirebaseFirestore, studentGroup: String, callback: (L
         }
 }
 
-fun fetchComponents(db: FirebaseFirestore, studentGroup: String, callback: (List<Pair<String, Double>>) -> Unit) {
+fun fetchComponents(db: FirebaseFirestore, studentGroup: String, callback: (List<Triple<String, String, Double>>) -> Unit) {
     db.collection("groups").document(studentGroup).get()
         .addOnSuccessListener { document ->
             val components = document.get("components") as? List<String> ?: emptyList()
@@ -238,12 +248,62 @@ fun fetchComponents(db: FirebaseFirestore, studentGroup: String, callback: (List
                         val componentList = result.documents.mapNotNull { doc ->
                             val name = doc.getString("name") ?: "Unknown Component"
                             val weight = doc.getDouble("weight") ?: 0.0
-                            name to weight
+                            val id = doc.id
+                            Log.d("ComponentFetch", "Component: $name, Weight: $weight, ID: $id")
+                            Triple(id, name, weight)
                         }
                         callback(componentList)
                     }
             } else {
                 callback(emptyList())
             }
+        }
+}
+
+fun fetchPerformanceSummary(
+    db: FirebaseFirestore,
+    userId: String,
+    components: List<Triple<String, String, Double>>,
+    callback: (String) -> Unit
+) {
+    db.collection("users").document(userId).get()
+        .addOnSuccessListener { document ->
+            val teamId = document.getString("team") ?: ""
+            if (teamId.isNotEmpty()) {
+                db.collection("groups").document(document.getString("group")!!).collection("teams").document(teamId).collection("students").document(userId).collection("totalScores").get()
+                    .addOnSuccessListener { scoreResult ->
+                        val scores = scoreResult.documents.mapNotNull { scoreDoc ->
+                            val componentId = scoreDoc.getString("componentId")
+                            val totalScore = scoreDoc.getDouble("totalScore")
+                            Log.d("ScoreFetch", "Component ID: $componentId, Score: $totalScore")
+                            componentId to totalScore
+                        }.toMap()
+
+                        Log.d("PerformanceSummary", "Scores fetched: $scores")
+
+                        var weightedSum = 0.0
+                        var totalWeight = 0.0
+
+                        components.forEach { (componentId, componentName, weight) ->
+                            val score = scores[componentId] ?: 0.0
+                            Log.d("PerformanceSummary", "Component ID: $componentId, Weight: $weight, Score: $score")
+                            weightedSum += score * weight
+                            totalWeight += weight
+                        }
+
+                        val averageScore = if (totalWeight > 0) weightedSum / totalWeight else 0.0
+                        val performanceDetails = "Semester average score: %.2f / 20".format(averageScore)
+
+                        callback(performanceDetails)
+                    }
+                    .addOnFailureListener { exception ->
+                        callback("Failed to fetch scores: ${exception.message}")
+                    }
+            } else {
+                callback("No team assigned.")
+            }
+        }
+        .addOnFailureListener { exception ->
+            callback("Failed to fetch user document: ${exception.message}")
         }
 }

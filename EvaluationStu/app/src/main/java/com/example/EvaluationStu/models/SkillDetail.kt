@@ -5,5 +5,5 @@ data class SkillDetail(
     val description: String,
     val score: Double,
     val comment: String,
-    val scoreHistory: List<Int>
+    val scoreHistory: List<Double>
 )
