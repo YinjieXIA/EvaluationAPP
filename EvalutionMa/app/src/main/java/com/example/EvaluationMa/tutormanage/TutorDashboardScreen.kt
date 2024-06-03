@@ -52,13 +52,6 @@ fun TutorDashboardScreen(navController: NavController) {
         Button(onClick = { navController.navigate("profile") }) {
             Text("Profile")
         }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = { navController.navigate("announcement_screen") }) {
-            Text("Announcement Management")
-        }
-
-
 
         Spacer(modifier = Modifier.height(16.dp))
 

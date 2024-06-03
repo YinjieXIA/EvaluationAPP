@@ -43,7 +43,8 @@ data class Announcement(
     val content: String = "",
     val timestamp: Long = 0,
     val sender: String = "",
-    val componentId: String? = null // 可选字段，为空时表示群发
+    val componentId: String? = null, // 可选字段，为空时表示群发
+    val groupId: String? = null // 可选字段
 )
 
 @Composable
@@ -191,8 +192,17 @@ fun AnnouncementScreen(navController: NavController) {
                                         selectedComponent?.id,
                                         title,
                                         content,
-                                        senderName
-                                    )
+                                        senderName,
+                                        null  // 没有群组ID，因为是发送给组件的公告
+                                    ){
+                                        showPostAnnouncement = false
+                                        // Reload announcements
+                                        loadAnnouncements(db, onSuccess = {
+                                            announcements = it
+                                        }, onFailure = {
+                                            errorMessage = "Error fetching announcements: $it"
+                                        })
+                                    }
                                     showPostAnnouncement = false
                                 }
                             }) {
@@ -229,7 +239,9 @@ fun postAnnouncement(
     componentId: String?,
     title: String,
     content: String,
-    sender: String
+    sender: String,
+    groupId: String?,
+    onSuccess: () -> Unit
 ) {
     val timestamp = System.currentTimeMillis()
     val announcement = Announcement(
@@ -237,12 +249,14 @@ fun postAnnouncement(
         content = content,
         timestamp = timestamp,
         sender = sender,
-        componentId = componentId
+        componentId = componentId,
+        groupId = groupId
     )
 
     db.collection("announcements").add(announcement)
         .addOnSuccessListener {
             Log.d("AnnouncementScreen", "Announcement posted successfully")
+            onSuccess()  // Call onSuccess callback to reload data
         }
         .addOnFailureListener { e ->
             Log.e("AnnouncementScreen", "Error posting announcement", e)

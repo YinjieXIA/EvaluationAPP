@@ -18,12 +18,23 @@ import com.google.firebase.firestore.FirebaseFirestore
 fun AnnouncementDetailScreen(navController: NavController, announcementId: String) {
     val db = FirebaseFirestore.getInstance()
     var announcement by remember { mutableStateOf<Announcement?>(null) }
+    var componentName by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(announcementId) {
         db.collection("announcements").document(announcementId).get()
             .addOnSuccessListener { document ->
-                announcement = document.toObject(Announcement::class.java)
+                val ann = document.toObject(Announcement::class.java)
+                announcement = ann
+                ann?.componentId?.let { componentId ->
+                    db.collection("components").document(componentId).get()
+                        .addOnSuccessListener { componentDoc ->
+                            componentName = componentDoc.getString("name")
+                        }
+                        .addOnFailureListener { e ->
+                            errorMessage = "Error fetching component details: ${e.message}"
+                        }
+                }
             }
             .addOnFailureListener { e ->
                 errorMessage = "Error fetching announcement details: ${e.message}"
@@ -78,7 +89,7 @@ fun AnnouncementDetailScreen(navController: NavController, announcementId: Strin
                         }
                         item {
                             Text(
-                                text = "Component: ${ann.componentId ?: "total"}",
+                                text = "Component: ${componentName ?: "total"}",
                                 style = MaterialTheme.typography.body2,
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )

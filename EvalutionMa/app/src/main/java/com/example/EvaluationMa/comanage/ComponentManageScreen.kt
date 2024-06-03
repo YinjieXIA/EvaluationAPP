@@ -71,12 +71,7 @@ fun ComponentManageScreen(navController: NavController) {
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { navController.navigate("announcement_screen") }) {
-            Text("Announcement Management")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+        Text("Go to Component Detail", style = MaterialTheme.typography.h5)
         if (components.isNotEmpty()) {
             LazyColumn {
                 items(components) { component ->
@@ -88,6 +83,33 @@ fun ComponentManageScreen(navController: NavController) {
                             .padding(vertical = 8.dp)
                             .clickable {
                                 navController.navigate("component_detail/$componentId")
+                            },
+                        elevation = 4.dp
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(componentName, style = MaterialTheme.typography.h6)
+                        }
+                    }
+                }
+            }
+        } else {
+            Text("No components found.")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("Go to Component Announcement", style = MaterialTheme.typography.h5)
+        if (components.isNotEmpty()) {
+            LazyColumn {
+                items(components) { component ->
+                    val componentId = component["uid"] as String
+                    val componentName = component["name"] as String
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                // 导航到ComponentAnnouncementScreen，传递componentId参数
+                                navController.navigate("componentAnnouncement/$componentId")
                             },
                         elevation = 4.dp
                     ) {

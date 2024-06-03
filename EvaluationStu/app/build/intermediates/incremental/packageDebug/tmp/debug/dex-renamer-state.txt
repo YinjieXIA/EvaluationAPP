@@ -1,17 +1,17 @@
-#Sun Jun 02 18:09:17 CST 2024
-base.0=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
-base.1=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
-base.10=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
-base.11=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
-base.12=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes4.dex
-base.2=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\12\\classes.dex
-base.3=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\13\\classes.dex
-base.4=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\2\\classes.dex
-base.5=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\4\\classes.dex
-base.6=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\5\\classes.dex
-base.7=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\6\\classes.dex
-base.8=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\8\\classes.dex
-base.9=E\:\\Users\\Cecilia\\AndroidStudioProjects\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\9\\classes.dex
+#Mon Jun 03 19:05:43 CEST 2024
+base.0=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
+base.1=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
+base.10=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
+base.11=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
+base.12=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes4.dex
+base.2=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\12\\classes.dex
+base.3=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\13\\classes.dex
+base.4=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\2\\classes.dex
+base.5=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\4\\classes.dex
+base.6=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\5\\classes.dex
+base.7=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\6\\classes.dex
+base.8=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\8\\classes.dex
+base.9=D\:\\IDEAproject\\EvaluationAPP\\EvaluationStu\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\9\\classes.dex
 path.0=classes.dex
 path.1=0/classes.dex
 path.10=classes2.dex

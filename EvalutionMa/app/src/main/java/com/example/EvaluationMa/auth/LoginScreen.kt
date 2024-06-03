@@ -72,6 +72,10 @@ fun LoginScreen(navController: NavController) {
                                                         errorMessage = ""
                                                         navController.navigate("tutor_dashboard_screen")
                                                     }
+                                                    if (role == "client") {
+                                                        errorMessage = ""
+                                                        navController.navigate("profile")
+                                                    }
                                                 }
                                             } else {
                                                 auth.signOut() // 登出用户

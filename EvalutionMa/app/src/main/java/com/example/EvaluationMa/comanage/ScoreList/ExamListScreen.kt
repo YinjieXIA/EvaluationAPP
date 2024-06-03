@@ -28,8 +28,10 @@ fun ExamListScreen(navController: NavController, componentId: String) {
     var groups by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
     var errorMessage by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        db.collection("groups").get()
+    LaunchedEffect(componentId) { // 使用 componentId 作为 LaunchedEffect 的 key
+        db.collection("groups")
+            .whereArrayContains("components", componentId)
+            .get()
             .addOnSuccessListener { result ->
                 groups = result.documents.mapNotNull { document ->
                     document.data?.apply { put("uid", document.id) }

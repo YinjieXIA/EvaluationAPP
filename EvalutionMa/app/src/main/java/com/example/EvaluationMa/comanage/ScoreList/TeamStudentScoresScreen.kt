@@ -106,32 +106,46 @@ fun TeamStudentScoresScreen(navController: NavController, componentId: String, g
             .collection("teams").document(teamId)
             .collection("students")
             .get()
-            .addOnSuccessListener { result ->
-                students = result.documents.mapNotNull { document ->
-                    document.data?.apply { put("uid", document.id) }
-                }
+            .addOnSuccessListener { studentResult ->
+                val studentInfoList = mutableListOf<Map<String, Any>>()
 
-                // Fetch scores for each student
-                students.forEach { student ->
-                    val studentId = student["uid"] as String
-                    db.collection("groups").document(groupId)
+                // 处理每个学生的数据
+                studentResult.documents.forEach { document ->
+                    val studentId = document.id
+                    val studentScoresRef = db.collection("groups").document(groupId)
                         .collection("teams").document(teamId)
                         .collection("students").document(studentId)
                         .collection("studentScores")
                         .whereEqualTo("componentId", componentId)
-                        .get()
+
+                    studentScoresRef.get()
                         .addOnSuccessListener { scoreResult ->
-                            val scores = scoreResult.documents.mapNotNull { document ->
-                                val skillId = document.getString("skillId") ?: return@mapNotNull null
-                                val score = document.getDouble("score") ?: return@mapNotNull null
-                                skillId to score
+                            val scores = scoreResult.documents.mapNotNull { scoreDoc ->
+                                val skillId = scoreDoc.getString("skillId")
+                                val score = scoreDoc.getDouble("score")
+                                if (skillId != null && score != null) skillId to score else null
                             }.toMap()
-                            studentScores = studentScores.toMutableMap().apply {
-                                this[studentId] = scores
-                            }
-                        }
-                        .addOnFailureListener { e ->
-                            errorMessage = "Error fetching student scores: $e"
+
+                            // 添加到学生成绩映射中
+                            studentScores = studentScores.toMutableMap().also { it[studentId] = scores }
+
+                            // 获取学生名字
+                            db.collection("users").document(studentId).get()
+                                .addOnSuccessListener { userDocument ->
+                                    if (userDocument.exists()) {
+                                        val userData = userDocument.data ?: emptyMap<String, Any>()
+                                        val studentInfo = mapOf(
+                                            "uid" to studentId,
+                                            "firstName" to (userData["firstName"] ?: "Unknown"),
+                                            "lastName" to (userData["lastName"] ?: "Unknown")
+                                        )
+                                        studentInfoList.add(studentInfo)
+                                        // 确保只更新一次学生列表
+                                        if (studentInfoList.size == studentResult.size()) {
+                                            students = studentInfoList.toList()
+                                        }
+                                    }
+                                }
                         }
                 }
             }

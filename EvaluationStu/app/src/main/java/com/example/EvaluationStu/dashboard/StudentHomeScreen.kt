@@ -224,17 +224,18 @@ fun StudentHomeScreen(navController: NavController) {
 }
 
 fun fetchAnnouncements(db: FirebaseFirestore, studentGroup: String, callback: (List<Announcement>) -> Unit) {
-    db.collection("announcements").get()
-        .addOnSuccessListener { result ->
-            val announcements = result.documents.mapNotNull { document ->
-                val announcement = document.toObject(Announcement::class.java)
-                if (announcement?.componentId == null || announcement.componentId == studentGroup) {
-                    announcement
-                } else {
-                    null
+    db.collection("announcements")
+        .whereEqualTo("groupId", studentGroup)  // Targeted announcements for the student's group
+        .get()
+        .addOnSuccessListener { targetedResult ->
+            val targetedAnnouncements = targetedResult.documents.mapNotNull { it.toObject(Announcement::class.java)?.copy(id = it.id) }
+            db.collection("announcements")
+                .whereEqualTo("groupId", null)  // General announcements for all students
+                .get()
+                .addOnSuccessListener { generalResult ->
+                    val generalAnnouncements = generalResult.documents.mapNotNull { it.toObject(Announcement::class.java)?.copy(id = it.id) }
+                    callback(targetedAnnouncements + generalAnnouncements)  // Combine both lists of announcements
                 }
-            }
-            callback(announcements)
         }
 }
 

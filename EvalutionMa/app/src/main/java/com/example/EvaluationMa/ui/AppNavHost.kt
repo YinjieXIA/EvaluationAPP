@@ -30,9 +30,10 @@ import com.example.EvaluationMa.admin.studentManage.StudentDetailScreen
 import com.example.EvaluationMa.admin.studentManage.StudentManagementScreen
 import com.example.EvaluationMa.admin.studentManage.AssignClientScreen
 import com.example.EvaluationMa.admin.studentManage.AssignComponentScreen
+import com.example.EvaluationMa.comanage.ComponentAnnouncementScreen
 import com.example.EvaluationMa.comanage.ComponentDetailScreen
 import com.example.EvaluationMa.comanage.ComponentManageScreen
-import com.example.EvaluationMa.comanage.ExamListScreen
+import com.example.EvaluationMa.comanage.ScoreList.ExamListScreen
 import com.example.EvaluationMa.comanage.ScoreList.STeamListScreen
 import com.example.EvaluationMa.comanage.ScoreList.TeamStudentScoresScreen
 import com.example.EvaluationMa.comanage.StudentEvaluationScreen
@@ -43,6 +44,7 @@ import com.example.EvaluationMa.comanage.addScore.StudentSkillScoreScreen
 import com.example.EvaluationMa.comanage.addScore.TeamListScreen
 import com.example.EvaluationMa.profile.ChangePasswordScreen
 import com.example.EvaluationMa.profile.ProfileScreen
+import com.example.EvaluationMa.tutormanage.TutorAnnouncementScreen
 import com.example.EvaluationMa.tutormanage.TutorComponentDetailScreen
 import com.example.EvaluationMa.tutormanage.TutorDashboardScreen
 import com.example.EvaluationMa.tutormanage.TutorGroupComponentsScreen
@@ -235,6 +237,24 @@ fun AppNavHost() {
             val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
             val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
             TutorComponentDetailScreen(navController, componentId, groupId)
+        }
+        composable("componentAnnouncement/{componentId}") { backStackEntry ->
+            // 从backStackEntry中获取参数
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            ComponentAnnouncementScreen(navController = navController, componentId = componentId)
+        }
+        composable(
+            route = "tutorAnnouncement/{componentId}/{groupId}",
+            arguments = listOf(
+                navArgument("componentId") { type = NavType.StringType },
+                navArgument("groupId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            TutorAnnouncementScreen(
+                navController = navController,
+                componentId = backStackEntry.arguments?.getString("componentId") ?: "",
+                groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            )
         }
 
 

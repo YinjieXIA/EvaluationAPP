@@ -27,22 +27,31 @@ fun AnnouncementsScreen(navController: NavController) {
     var studentGroup by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(currentUser) {
         currentUser?.let { user ->
             db.collection("users").document(user.uid).get()
                 .addOnSuccessListener { document ->
                     studentGroup = document.getString("group")
                     studentGroup?.let { groupId ->
-                        db.collection("announcements").get()
+                        db.collection("announcements")
+                            .whereEqualTo("groupId", groupId) // 查询指定群组的公告
+                            .get()
                             .addOnSuccessListener { result ->
-                                announcements = result.documents.mapNotNull { document ->
-                                    document.toObject(Announcement::class.java)?.copy(id = document.id)
-                                }.filter { announcement ->
-                                    announcement.componentId == null || announcement.componentId == groupId
+                                val targetedAnnouncements = result.documents.mapNotNull {
+                                    it.toObject(Announcement::class.java)?.copy(id = it.id)
                                 }
+                                db.collection("announcements")
+                                    .whereEqualTo("groupId", null) // 查询广播公告
+                                    .get()
+                                    .addOnSuccessListener { generalResult ->
+                                        val generalAnnouncements = generalResult.documents.mapNotNull {
+                                            it.toObject(Announcement::class.java)?.copy(id = it.id)
+                                        }
+                                        announcements = targetedAnnouncements + generalAnnouncements // 合并两类公告
+                                    }
                             }
                             .addOnFailureListener { e ->
-                                errorMessage = "Error fetching announcements: ${e.message}"
+                                errorMessage = "Error fetching targeted announcements: ${e.message}"
                             }
                     }
                 }

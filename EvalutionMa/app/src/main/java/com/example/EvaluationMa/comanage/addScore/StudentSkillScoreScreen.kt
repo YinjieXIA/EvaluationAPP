@@ -54,8 +54,25 @@ fun StudentSkillScoreScreen(navController: NavController, groupId: String, teamI
             .collection("students")
             .get()
             .addOnSuccessListener { result ->
-                students = result.documents.mapNotNull { document ->
-                    document.data?.apply { put("uid", document.id) }
+                val studentIds = result.documents.mapNotNull { document -> document.id }
+
+                // 初始空列表
+                val loadedStudents = mutableListOf<Map<String, Any>>()
+
+                // 异步加载每个学生的名字
+                studentIds.forEach { studentId ->
+                    fetchStudentName(studentId, onSuccess = { userData ->
+                        // 组合学生信息并更新状态
+                        val studentData = mapOf(
+                            "uid" to studentId,
+                            "firstName" to userData["firstName"],
+                            "lastName" to userData["lastName"]
+                        )
+                        loadedStudents.add(studentData as Map<String, Any>)
+                        students = loadedStudents.toList()
+                    }, onFailure = { e ->
+                        errorMessage = "Error fetching student name: $e"
+                    })
                 }
             }
             .addOnFailureListener { e ->
@@ -171,6 +188,21 @@ fun saveStudentScore(
         .add(scoreData) // 使用 add 方法插入新文档
         .addOnSuccessListener {
             onSuccess()
+        }
+        .addOnFailureListener { e ->
+            onFailure(e)
+        }
+}
+
+fun fetchStudentName(studentId: String, onSuccess: (Map<String, Any>) -> Unit, onFailure: (Exception) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("users").document(studentId).get()
+        .addOnSuccessListener { document ->
+            if (document.exists()) {
+                onSuccess(document.data ?: emptyMap())
+            } else {
+                onFailure(Exception("No such student found"))
+            }
         }
         .addOnFailureListener { e ->
             onFailure(e)

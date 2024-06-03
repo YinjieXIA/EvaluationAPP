@@ -57,6 +57,13 @@ fun TutorComponentDetailScreen(navController: NavController, componentId: String
             Text("Component Details", style = MaterialTheme.typography.h5)
             Spacer(modifier = Modifier.height(16.dp))
 
+            Button(onClick = {
+                // 导航时传递 componentId 和 groupId
+                navController.navigate("tutorAnnouncement/$componentId/$groupId")
+            }) {
+                Text("Go to Announcements")
+            }
+
             // 显示技能列表
             Text("Skills", style = MaterialTheme.typography.h6)
             Spacer(modifier = Modifier.height(8.dp))
