@@ -102,11 +102,11 @@ fun AnnouncementScreen(navController: NavController) {
         Text("Announcements", style = MaterialTheme.typography.h5)
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (role == "module_manager") {
+        //if (role == "module_manager") {
             Button(onClick = { showPostAnnouncement = true }) {
                 Text("Post Announcement")
             }
-        }
+        //}
 
         Spacer(modifier = Modifier.height(16.dp))
 

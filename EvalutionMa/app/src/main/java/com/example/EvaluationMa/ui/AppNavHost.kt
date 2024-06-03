@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.EvaluationMa.admin.AdminReviewRequestsScreen
 import com.example.EvaluationMa.admin.AnnouncementScreen
 import com.example.EvaluationMa.comanage.ComponentManagementScreen
 import com.example.EvaluationMa.admin.ModuleManageScreen
@@ -30,11 +31,21 @@ import com.example.EvaluationMa.admin.studentManage.StudentManagementScreen
 import com.example.EvaluationMa.admin.studentManage.AssignClientScreen
 import com.example.EvaluationMa.admin.studentManage.AssignComponentScreen
 import com.example.EvaluationMa.comanage.ComponentDetailScreen
+import com.example.EvaluationMa.comanage.ComponentManageScreen
 import com.example.EvaluationMa.comanage.ExamListScreen
+import com.example.EvaluationMa.comanage.ScoreList.STeamListScreen
+import com.example.EvaluationMa.comanage.ScoreList.TeamStudentScoresScreen
 import com.example.EvaluationMa.comanage.StudentEvaluationScreen
 import com.example.EvaluationMa.comanage.StudentScoresScreen
+import com.example.EvaluationMa.comanage.addScore.StudentScoreListScreen
+import com.example.EvaluationMa.comanage.addScore.StudentScoreScreen
+import com.example.EvaluationMa.comanage.addScore.StudentSkillScoreScreen
+import com.example.EvaluationMa.comanage.addScore.TeamListScreen
 import com.example.EvaluationMa.profile.ChangePasswordScreen
 import com.example.EvaluationMa.profile.ProfileScreen
+import com.example.EvaluationMa.tutormanage.TutorComponentDetailScreen
+import com.example.EvaluationMa.tutormanage.TutorDashboardScreen
+import com.example.EvaluationMa.tutormanage.TutorGroupComponentsScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -198,6 +209,32 @@ fun AppNavHost() {
         }
         composable(route = "announcement_screen") {
             AnnouncementScreen(navController)
+        }
+
+        composable(route = "admin_review_requests") {
+            AdminReviewRequestsScreen(navController)
+        }
+        composable("component_manage_screen") {
+            ComponentManageScreen(navController = navController)
+        }
+        composable("tutor_dashboard_screen") {
+            TutorDashboardScreen(navController = navController)
+        }
+        composable("tutor_group_components/{groupId}",
+            arguments = listOf(navArgument("groupId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            TutorGroupComponentsScreen(navController, groupId)
+        }
+        composable("tutor_component_detail/{componentId}/{groupId}",
+            arguments = listOf(
+                navArgument("componentId") { type = NavType.StringType },
+                navArgument("groupId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            TutorComponentDetailScreen(navController, componentId, groupId)
         }
 
 

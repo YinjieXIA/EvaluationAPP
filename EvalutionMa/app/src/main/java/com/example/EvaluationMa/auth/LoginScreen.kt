@@ -64,6 +64,14 @@ fun LoginScreen(navController: NavController) {
                                                         errorMessage = ""
                                                         navController.navigate("module_manage")
                                                     }
+                                                    if (role == "component_manager") {
+                                                        errorMessage = ""
+                                                        navController.navigate("component_manage_screen")
+                                                    }
+                                                    if (role == "tutor") {
+                                                        errorMessage = ""
+                                                        navController.navigate("tutor_dashboard_screen")
+                                                    }
                                                 }
                                             } else {
                                                 auth.signOut() // 登出用户

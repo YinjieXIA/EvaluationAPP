@@ -139,7 +139,7 @@ fun loadAnnouncements(
     onSuccess: (List<Announcement>) -> Unit,
     onFailure: (Exception) -> Unit
 ) {
-    db.collection("components").document(componentId).collection("announcements").orderBy("timestamp", Query.Direction.DESCENDING).limit(limit).get()
+    db.collection("announcements").document(componentId).collection("announcements").orderBy("timestamp", Query.Direction.DESCENDING).limit(limit).get()
         .addOnSuccessListener { result ->
             val announcements = result.documents.mapNotNull { document ->
                 document.toObject(Announcement::class.java)?.copy(id = document.id)
