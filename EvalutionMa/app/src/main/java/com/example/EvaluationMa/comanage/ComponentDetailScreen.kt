@@ -84,7 +84,7 @@ fun ComponentDetailScreen(navController: NavController, componentId: String) {
 
             // 添加学生成绩按钮
             Button(onClick = {
-                navController.navigate("student_scores/$componentId")
+                navController.navigate("student_score_screen/$componentId")
             }) {
                 Text("Add Student Scores")
             }

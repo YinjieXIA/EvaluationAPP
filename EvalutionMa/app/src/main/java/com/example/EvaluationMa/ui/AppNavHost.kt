@@ -81,22 +81,52 @@ fun AppNavHost() {
             arguments = listOf(navArgument("componentId") { type = NavType.StringType })
         ) { backStackEntry ->
             val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            val groupId = backStackEntry.arguments?.getString("groupId")
             ComponentDetailScreen(navController, componentId)
         }
-        composable("student_scores/{componentId}?groupId={groupId}") { backStackEntry ->
+        composable("student_score_screen/{componentId}") { backStackEntry ->
             val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
-            val groupId = backStackEntry.arguments?.getString("groupId")
-            StudentScoresScreen(navController, componentId, groupId)
+            StudentScoreScreen(navController = navController, componentId = componentId)
+        }
+        composable("team_list/{groupId}/{componentId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            TeamListScreen(navController = navController, groupId = groupId, componentId = componentId)
+        }
+        composable("student_score_list/{groupId}/{teamId}/{componentId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            val teamId = backStackEntry.arguments?.getString("teamId") ?: ""
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            StudentScoreListScreen(navController = navController, groupId = groupId, teamId = teamId, componentId = componentId)
+        }
+        composable("student_scores/{groupId}/{teamId}/{componentId}/{skillId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            val teamId = backStackEntry.arguments?.getString("teamId") ?: ""
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            val skillId = backStackEntry.arguments?.getString("skillId") ?: ""
+            StudentSkillScoreScreen(navController = navController, groupId = groupId, teamId = teamId, componentId = componentId, skillId = skillId)
         }
         composable("exam_list/{componentId}") { backStackEntry ->
-            ExamListScreen(navController, backStackEntry.arguments?.getString("componentId") ?: "")
-        }
-        composable("student_evaluation/{componentId}/{examName}/{studentId}") { backStackEntry ->
             val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
-            val examName = backStackEntry.arguments?.getString("examName") ?: ""
-            val studentId = backStackEntry.arguments?.getString("studentId") ?: ""
-            StudentEvaluationScreen(navController, componentId, examName, studentId)
+            ExamListScreen(navController, componentId)
         }
+        composable("steam_list/{componentId}/{groupId}") { backStackEntry ->
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            STeamListScreen(navController, componentId, groupId)
+        }
+        composable("team_student_scores/{componentId}/{groupId}/{teamId}") { backStackEntry ->
+            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            val teamId = backStackEntry.arguments?.getString("teamId") ?: ""
+            TeamStudentScoresScreen(navController, componentId, groupId, teamId)
+        }
+//        composable("student_evaluation/{componentId}/{examName}/{studentId}") { backStackEntry ->
+//            val componentId = backStackEntry.arguments?.getString("componentId") ?: ""
+//            val examName = backStackEntry.arguments?.getString("examName") ?: ""
+//            val studentId = backStackEntry.arguments?.getString("studentId") ?: ""
+//            StudentEvaluationScreen(navController, componentId, examName, studentId)
+//        }
         composable(
             route = "manage_skills/{componentId}",
             arguments = listOf(navArgument("componentId") { type = NavType.StringType })
